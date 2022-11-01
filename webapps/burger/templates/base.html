@@ -10,8 +10,12 @@
   <script src="{% static 'js/bootstrap.min.js' %}"></script>
 </head>
 
-<body onload="startGame()">
+<body onload="startGame('{{uuid}}')">
 </body>
+
+<script>
+  const addIngredientUrl = "{% url 'add-ingredient' %}"
+</script>
 <script src="{% static 'js/foo.js' %}" type="text/javascript"></script>
 
 </html>

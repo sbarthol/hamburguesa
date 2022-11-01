@@ -17,5 +17,7 @@ from django.urls import path
 from burger import views
 
 urlpatterns = [
-    path('', views.foo, name='foo'),
+    path('', views.register_player, name='register-player'),
+    path('new-game', views.new_game, name='new-game'),
+    path('add-ingredient', views.add_ingredient, name='add-ingredient')
 ]

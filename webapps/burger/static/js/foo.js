@@ -26,7 +26,10 @@ leftArmImg.src = '/static/leftArm.png';
 const rightArmImg = new Image();
 rightArmImg.src = '/static/rightArm.png';
 
-function startGame() {
+var uuid
+
+function startGame(uuid_) {
+  uuid = uuid_;
   gameCanvas.start();
   player = new createPlayer(120, 120, 300 - 60);
   leftArm = new createLeftArm(500, 100, 280);
@@ -157,6 +160,56 @@ function updateCanvas() {
   rightArm.draw();
 }
 
+function displayError(message) {
+  alert(message)
+	console.log(message)
+}
+
+function getCSRFToken() {
+	let cookies = document.cookie.split(";");
+	for (let i = 0; i < cookies.length; i++) {
+		let c = cookies[i].trim();
+		if (c.startsWith("csrftoken=")) {
+			return c.substring("csrftoken=".length, c.length);
+		}
+	}
+	return "unknown";
+}
+
+function addIngredientRequest(ingredient) {
+  let xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState != 4) return;
+		if (xhr.status == 200) {
+      return;
+    }
+    if (xhr.status == 0) {
+      displayError("Cannot connect to server");
+      return;
+    }
+    if (!xhr.getResponseHeader("content-type") == "application/json") {
+      displayError("Received status=" + xhr.status);
+      return;
+    }
+    let response = JSON.parse(xhr.responseText);
+    if (response.hasOwnProperty("error")) {
+      displayError(response.error);
+      return;
+    }
+	};
+
+	xhr.open("POST", addIngredientUrl, true);
+	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xhr.send(
+		"ingredient=" +
+    ingredient +
+			"&uuid=" +
+			uuid +
+			"&csrfmiddlewaretoken=" +
+			getCSRFToken()
+	);
+}
+
 document.body.onkeyup = function(e) {
   if (e.keyCode == 32) {
     isJumping = true;
@@ -165,6 +218,7 @@ document.body.onkeyup = function(e) {
     if(!leftArmIsMoving) {
       leftArmIsMoving = true;
       leftArmSpeed = armSpeed;
+      addIngredientRequest("onions")
     }
   } else if (e.keyCode == 37) {
     if (!rightArmIsMoving) {
