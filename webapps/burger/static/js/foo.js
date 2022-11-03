@@ -67,6 +67,8 @@ function createLeftArm(width, height, y) {
   this.move = function() {
     if(leftArmIsMoving) {
       this.x += leftArmSpeed;
+    } else {
+
     }
   }
 
@@ -143,6 +145,44 @@ function createPlayer(width, height, x) {
       }
   }
 }
+
+// From https://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
+function getMousePos(canvas, evt) {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: evt.clientX - rect.left,
+    y: evt.clientY - rect.top
+  };
+}
+
+gameCanvas.canvas.addEventListener('mousemove', function(evt) {
+  var mousePos = getMousePos(gameCanvas.canvas, evt);
+  // console.log('Mouse position: ' + mousePos.x + ',' + mousePos.y);
+  leftArm.y = mousePos.y
+  gameSocket.send(JSON.stringify({
+        'pos': mousePos.y
+  }));
+}, false);
+
+const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+const gameSocket = new WebSocket(
+    'ws://'
+    + window.location.host
+    + '/ws/'
+    + roomName
+    + '/'
+);
+
+gameSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    console.log(data)
+    rightArm.y = data.pos
+};
+
+gameSocket.onclose = function(e) {
+    console.error('Socket closed unexpectedly');
+};
 
 function updateCanvas() {
   ctx = gameCanvas.context;
