@@ -4,10 +4,13 @@ var rightArm;
 var belt;
 var ingredients = []
 var ingredientCounter = 1
+var gameSocket
 const allIngredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese", "bun"]
 
 // Todo: what to do with the uuid
-function startGame(uuid) {
+function startGame(uuid_, roomName_) {
+
+  gameSocket = createGameSocket(roomName_)
   gameCanvas.start();
   leftArm = new createLeftArm(-350, window.innerHeight - 150, 512, 120);
   rightArm = new createRightArm(window.innerWidth - 150, window.innerHeight - 150, 512, 120);
@@ -188,17 +191,16 @@ gameCanvas.canvas.addEventListener('click', function(evt) {
   
 }, false);
 
-const roomName = JSON.parse(document.getElementById('room-name').textContent);
-
-const gameSocket = new WebSocket(
+function createGameSocket(roomName) {
+  const gameSocket = new WebSocket(
     'ws://'
     + window.location.host
     + '/ws/'
     + roomName
     + '/'
-);
+  );
 
-gameSocket.onmessage = function(e) {
+  gameSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     const ingredientId = data["ingredientId"];
     console.log("received data " + e.data);
@@ -211,11 +213,13 @@ gameSocket.onmessage = function(e) {
     if(clickedIngredient != null) {
       rightArm.fetchIngredient( {x: clickedIngredient.x + 100, y: clickedIngredient.y})
     }
-};
+  };
 
-gameSocket.onclose = function(e) {
+  gameSocket.onclose = function(e) {
     console.error('Socket closed unexpectedly');
-};
+  };
+  return gameSocket;
+}
 
 function updateCanvas() {
   ctx = gameCanvas.context;
@@ -245,18 +249,4 @@ function updateCanvas() {
 function addRandomIngredient() {
   const name = allIngredients[ingredientCounter % allIngredients.length];
   ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
-}
-
-function displayError(message) {
-  alert(message)
-	console.log(message)
-}
-
-document.body.onkeyup = function(e) {
-  if (e.keyCode == 32) {
-  } else if (e.keyCode == 39) {
-    
-  } else if (e.keyCode == 37) {
-    
-  }
 }
