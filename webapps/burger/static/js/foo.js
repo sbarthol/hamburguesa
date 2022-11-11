@@ -1,20 +1,9 @@
 
-var player;
 var leftArm;
 var rightArm;
-var interval;
-var isJumping = true;
-var jumpSpeed = -1;
-var armSpeed = 14;
-var leftArmSpeed;
-var rightArmSpeed;
-var leftArmIsMoving = false;
-var rightArmIsMoving = false;
+var belt;
 var ingredients = []
 const allIngredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese", "bun"]
-
-const burgerImg = new Image();
-burgerImg.src = '/static/burgerImg.png';
 
 const leftArmImg = new Image();
 leftArmImg.src = '/static/leftArm.png';
@@ -22,24 +11,13 @@ leftArmImg.src = '/static/leftArm.png';
 const rightArmImg = new Image();
 rightArmImg.src = '/static/rightArm.png';
 
-var uuid
-
 function startGame(uuid_) {
-  uuid = uuid_;
   gameCanvas.start();
-  player = new createPlayer(window.innerWidth / 2, window.innerHeight / 2, 100, 100);
   leftArm = new createLeftArm(-200, window.innerHeight / 2, 512, 120);
   rightArm = new createRightArm(window.innerWidth - 300, window.innerHeight / 2, 512, 120);
   belt = new createBelt(0, 130, window.innerWidth, 25);
   setInterval(updateCanvas, 20);
   setInterval(addRandomIngredient, 1000);
-}
-
-
-
-function resetJump() {
-  jumpSpeed = 0;
-  isJumping = false;
 }
 
 var gameCanvas = {
@@ -109,25 +87,11 @@ function createLeftArm(x, y, width, height) {
   }
 
   this.move = function() {
-    if(leftArmIsMoving) {
-      this.x += leftArmSpeed;
-    } else {
-
-    }
-  }
-
-  this.changeDir = function() {
-    if (leftArmIsMoving && this.x + 500 > window.innerWidth / 2) {
-      this.x = window.innerWidth / 2 - 500;
-      leftArmSpeed = -leftArmSpeed;
-    }
+    
   }
 
   this.stop = function() {
-    if (leftArmIsMoving && this.x  < -400) {
-      this.x = -400;
-      leftArmIsMoving = false;
-    }
+    
   }
 }
 
@@ -143,50 +107,14 @@ function createRightArm(x, y, width, height) {
   }
 
   this.move = function() {
-    if(rightArmIsMoving) {
-      this.x += rightArmSpeed;
-    }
-  }
-
-  this.changeDir = function() {
-    if (rightArmIsMoving && this.x < window.innerWidth / 2) {
-      this.x = window.innerWidth / 2;
-      rightArmSpeed = -rightArmSpeed;
-    }
+  
   }
 
   this.stop = function() {
-    if (rightArmIsMoving && this.x  > 500) {
-      this.x = 500;
-      rightArmIsMoving = false;
-    }
+    
   }
 }
 
-function createPlayer(x, y, width, height) {
-  this.width = width;
-  this.height = height;
-  this.x = x;
-  this.y = y;
-  
-  this.draw = function() {
-      ctx = gameCanvas.context;
-      ctx.drawImage(burgerImg, this.x, this.y, this.width, this.height);
-  }
-  this.stopPlayer = function() {
-      var ground = window.innerHeight - this.height;
-      if (this.y > ground) {
-          this.y = ground;
-          isJumping = false;
-      }
-  }
-  this.jump = function() {
-      if (isJumping) {
-          this.y -= jumpSpeed;
-          jumpSpeed -= 0.3;
-      }
-  }
-}
 
 // From https://stackoverflow.com/questions/1114465/getting-mouse-location-in-canvas
 function getMousePos(canvas, evt) {
@@ -198,12 +126,10 @@ function getMousePos(canvas, evt) {
 }
 
 gameCanvas.canvas.addEventListener('mousemove', function(evt) {
-  var mousePos = getMousePos(gameCanvas.canvas, evt);
-  // console.log('Mouse position: ' + mousePos.x + ',' + mousePos.y);
-  leftArm.y = mousePos.y
+  /*var mousePos = getMousePos(gameCanvas.canvas, evt);
   gameSocket.send(JSON.stringify({
         'pos': mousePos.y
-  }));
+  }));*/
 }, false);
 
 const roomName = JSON.parse(document.getElementById('room-name').textContent);
@@ -219,7 +145,6 @@ const gameSocket = new WebSocket(
 gameSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     console.log(data)
-    rightArm.y = data.pos
 };
 
 gameSocket.onclose = function(e) {
@@ -229,13 +154,11 @@ gameSocket.onclose = function(e) {
 function updateCanvas() {
   ctx = gameCanvas.context;
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-  player.jump();
-  player.stopPlayer();
+  
   leftArm.move();
-  leftArm.changeDir();
   leftArm.stop();
+
   rightArm.move();
-  rightArm.changeDir();
   rightArm.stop();
 
   while(ingredients.length > 0 && ingredients[0].x > window.innerWidth) {
@@ -245,7 +168,6 @@ function updateCanvas() {
     ingredients[i].move();
   }
 
-  player.draw();
   leftArm.draw();
   rightArm.draw();
   belt.draw();
@@ -266,65 +188,11 @@ function displayError(message) {
 	console.log(message)
 }
 
-function getCSRFToken() {
-	let cookies = document.cookie.split(";");
-	for (let i = 0; i < cookies.length; i++) {
-		let c = cookies[i].trim();
-		if (c.startsWith("csrftoken=")) {
-			return c.substring("csrftoken=".length, c.length);
-		}
-	}
-	return "unknown";
-}
-
-function addIngredientRequest(ingredient) {
-  let xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState != 4) return;
-		if (xhr.status == 200) {
-      return;
-    }
-    if (xhr.status == 0) {
-      displayError("Cannot connect to server");
-      return;
-    }
-    if (!xhr.getResponseHeader("content-type") == "application/json") {
-      displayError("Received status=" + xhr.status);
-      return;
-    }
-    let response = JSON.parse(xhr.responseText);
-    if (response.hasOwnProperty("error")) {
-      displayError(response.error);
-      return;
-    }
-	};
-
-	xhr.open("POST", addIngredientUrl, true);
-	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	xhr.send(
-		"ingredient=" +
-    ingredient +
-			"&uuid=" +
-			uuid +
-			"&csrfmiddlewaretoken=" +
-			getCSRFToken()
-	);
-}
-
 document.body.onkeyup = function(e) {
   if (e.keyCode == 32) {
-    isJumping = true;
-    jumpSpeed = 10;
   } else if (e.keyCode == 39) {
-    if(!leftArmIsMoving) {
-      leftArmIsMoving = true;
-      leftArmSpeed = armSpeed;
-      addIngredientRequest("onions")
-    }
+    
   } else if (e.keyCode == 37) {
-    if (!rightArmIsMoving) {
-      rightArmIsMoving = true;
-      rightArmSpeed = -armSpeed;
-    }
+    
   }
 }
