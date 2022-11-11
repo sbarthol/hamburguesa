@@ -1,21 +1,16 @@
-var canvasHeight = 400;
-var canvasWidth = 600;
 
 var player;
 var leftArm;
 var rightArm;
-var playerYPosition = 200;
-
 var interval;
-
 var isJumping = true;
 var jumpSpeed = -1;
-
 var armSpeed = 14;
 var leftArmSpeed;
 var rightArmSpeed;
 var leftArmIsMoving = false;
 var rightArmIsMoving = false;
+var ingredients = []
 
 const burgerImg = new Image();
 burgerImg.src = '/static/burgerImg.png';
@@ -31,11 +26,15 @@ var uuid
 function startGame(uuid_) {
   uuid = uuid_;
   gameCanvas.start();
-  player = new createPlayer(120, 120, 300 - 60);
-  leftArm = new createLeftArm(500, 100, 280);
-  rightArm = new createRightArm(500, 100, 280);
+  player = new createPlayer(window.innerWidth / 2, window.innerHeight / 2, 100, 100);
+  leftArm = new createLeftArm(-200, window.innerHeight / 2, 512, 120);
+  rightArm = new createRightArm(window.innerWidth - 300, window.innerHeight / 2, 512, 120);
+  belt = new createBelt(0, 130, window.innerWidth, 25);
   setInterval(updateCanvas, 20);
+  setInterval(addIngredient, 1000);
 }
+
+
 
 function resetJump() {
   jumpSpeed = 0;
@@ -46,17 +45,61 @@ var gameCanvas = {
   canvas: document.createElement("canvas"),
   context: null,
   start: function() {
-    this.canvas.width = canvasWidth;
-    this.canvas.height = canvasHeight;
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
   }
 }
 
-function createLeftArm(width, height, y) {
+function createIngredient(x, y, width, height, img) {
   this.width = width;
   this.height = height;
-  this.x = -400;
+  this.x = x;
+  this.y = y;
+  this.img = img
+
+  this.draw = function() {
+    ctx = gameCanvas.context;
+    ctx.drawImage(leftArmImg, this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "gray";
+    border = 2
+    ctx.fillRect(this.x, this.y + border, this.width, this.height - 2 * border);
+  }
+
+  this.move = function() {
+    this.x += 3.0;
+  }
+
+  this.draw = function() {
+    ctx = gameCanvas.context;
+    ctx.drawImage(img, this.x, this.y, this.width, this.height);
+  }
+}
+
+function createBelt(x, y, width, height) {
+  this.width = width;
+  this.height = height;
+  this.x = x;
+  this.y = y;
+
+  this.draw = function() {
+    ctx = gameCanvas.context;
+    ctx.drawImage(leftArmImg, this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.fillStyle = "gray";
+    border = 2
+    ctx.fillRect(this.x, this.y + border, this.width, this.height - 2 * border);
+  }
+}
+
+function createLeftArm(x, y, width, height) {
+  this.width = width;
+  this.height = height;
+  this.x = x;
   this.y = y;
 
   this.draw = function() {
@@ -73,8 +116,8 @@ function createLeftArm(width, height, y) {
   }
 
   this.changeDir = function() {
-    if (leftArmIsMoving && this.x + 500 > canvasWidth / 2) {
-      this.x = canvasWidth / 2 - 500;
+    if (leftArmIsMoving && this.x + 500 > window.innerWidth / 2) {
+      this.x = window.innerWidth / 2 - 500;
       leftArmSpeed = -leftArmSpeed;
     }
   }
@@ -87,10 +130,10 @@ function createLeftArm(width, height, y) {
   }
 }
 
-function createRightArm(width, height, y) {
+function createRightArm(x, y, width, height) {
   this.width = width;
   this.height = height;
-  this.x = 500;
+  this.x = x;
   this.y = y;
 
   this.draw = function() {
@@ -105,8 +148,8 @@ function createRightArm(width, height, y) {
   }
 
   this.changeDir = function() {
-    if (rightArmIsMoving && this.x < canvasWidth / 2) {
-      this.x = canvasWidth / 2;
+    if (rightArmIsMoving && this.x < window.innerWidth / 2) {
+      this.x = window.innerWidth / 2;
       rightArmSpeed = -rightArmSpeed;
     }
   }
@@ -119,20 +162,18 @@ function createRightArm(width, height, y) {
   }
 }
 
-function createPlayer(width, height, x) {
+function createPlayer(x, y, width, height) {
   this.width = width;
   this.height = height;
   this.x = x;
-  this.y = playerYPosition;
+  this.y = y;
   
   this.draw = function() {
       ctx = gameCanvas.context;
-      ctx.fillStyle = "green";
-      //ctx.fillRect(this.x, this.y, this.width, this.height);
       ctx.drawImage(burgerImg, this.x, this.y, this.width, this.height);
   }
   this.stopPlayer = function() {
-      var ground = canvasHeight - this.height;
+      var ground = window.innerHeight - this.height;
       if (this.y > ground) {
           this.y = ground;
           isJumping = false;
@@ -186,7 +227,7 @@ gameSocket.onclose = function(e) {
 
 function updateCanvas() {
   ctx = gameCanvas.context;
-  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   player.jump();
   player.stopPlayer();
   leftArm.move();
@@ -195,9 +236,25 @@ function updateCanvas() {
   rightArm.move();
   rightArm.changeDir();
   rightArm.stop();
+
+  while(ingredients.length > 0 && ingredients[0].x > window.innerWidth) {
+    ingredients.shift();
+  }
+  for (var i = 0; i < ingredients.length; i++) {
+    ingredients[i].move();
+  }
+
   player.draw();
   leftArm.draw();
   rightArm.draw();
+  belt.draw();
+  for (var i = 0; i < ingredients.length; i++) {
+    ingredients[i].draw();
+  }
+}
+
+function addIngredient() {
+  ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, burgerImg));
 }
 
 function displayError(message) {
