@@ -9,8 +9,8 @@ const allIngredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese"
 // Todo: what to do with the uuid
 function startGame(uuid) {
   gameCanvas.start();
-  leftArm = new createLeftArm(-200, window.innerHeight / 2, 512, 120);
-  rightArm = new createRightArm(window.innerWidth - 300, window.innerHeight / 2, 512, 120);
+  leftArm = new createLeftArm(-350, window.innerHeight - 150, 512, 120);
+  rightArm = new createRightArm(window.innerWidth - 150, window.innerHeight - 150, 512, 120);
   belt = new createBelt(0, 130, window.innerWidth, 25);
   setInterval(updateCanvas, 20);
   setInterval(addRandomIngredient, 1000);
@@ -70,21 +70,44 @@ function createLeftArm(x, y, width, height) {
   this.height = height;
   this.x = x;
   this.y = y;
+  this.startX = x;
+  this.startY = y;
 
   this.img = new Image();
   this.img.src = '/static/leftArm.png';
+
+  this.dest = null; // contains the dest of the upper right corner
+  this.movingState = 0; // 1 -> grab, 2 -> put down, 3 -> back to start pos
 
   this.draw = function() {
     ctx = gameCanvas.context;
     ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
   }
 
-  this.move = function() {
-    
+
+  this.fetchIngredient = function(dest_) {
+    this.movingState = 1;
+    this.dest = dest_;
   }
 
-  this.stop = function() {
-    
+  this.move = function() {
+    if(this.dest != null) {
+      const dirVec = {x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y};
+      const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
+      const speedVec = {x: 20 * dirVec.x / norm, y: 20 * dirVec.y / norm};
+      this.x += speedVec.x;
+      this.y += speedVec.y;
+
+      if(this.movingState == 1 && this.y < this.dest.y) {
+        this.dest = {x: window.innerWidth / 2, y: window.innerHeight - 130};
+        this.movingState = 2;
+      } else if (this.movingState == 2 && this.y > this.dest.y) {
+        this.dest = {x: this.startX, y: this.startY};
+        this.movingState = 3;
+      } else if (this.movingState == 3 && this.x < this.dest.x) {
+        this.dest = null;
+      }
+    }
   }
 }
 
@@ -106,6 +129,10 @@ function createRightArm(x, y, width, height) {
   
   }
 
+  this.changeDir = function() {
+    
+  }
+
   this.stop = function() {
     
   }
@@ -121,11 +148,23 @@ function getMousePos(canvas, evt) {
   };
 }
 
-gameCanvas.canvas.addEventListener('mousemove', function(evt) {
-  /*var mousePos = getMousePos(gameCanvas.canvas, evt);
-  gameSocket.send(JSON.stringify({
+gameCanvas.canvas.addEventListener('click', function(evt) {
+  var mousePos = getMousePos(gameCanvas.canvas, evt);
+  var clickedIngredient = null
+  for(var i=0;i<ingredients.length;i++){
+    if(ingredients[i].x <= mousePos.x && mousePos.x < ingredients[i].x + ingredients[i].width
+      && ingredients[i].y <= mousePos.y && mousePos.y < ingredients[i].y + ingredients[i].height) {
+        clickedIngredient = ingredients[i];
+      }
+  }
+  if(clickedIngredient != null) {
+    console.log("clicked on " + clickedIngredient.name);
+    /*gameSocket.send(JSON.stringify({
         'pos': mousePos.y
-  }));*/
+    }));*/
+    leftArm.fetchIngredient( {x: clickedIngredient.x + clickedIngredient.width + 100, y: clickedIngredient.y})
+  }
+  
 }, false);
 
 const roomName = JSON.parse(document.getElementById('room-name').textContent);
@@ -152,10 +191,7 @@ function updateCanvas() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   
   leftArm.move();
-  leftArm.stop();
-
   rightArm.move();
-  rightArm.stop();
 
   // Todo: should i let the ingredients past the edge
   // for the case where the mouse grabs an ingredient
@@ -167,12 +203,12 @@ function updateCanvas() {
     ingredients[i].move();
   }
 
-  leftArm.draw();
-  rightArm.draw();
   belt.draw();
   for (var i = 0; i < ingredients.length; i++) {
     ingredients[i].draw();
   }
+  leftArm.draw();
+  rightArm.draw();
 }
 
 function addRandomIngredient() {
