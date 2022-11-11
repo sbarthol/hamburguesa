@@ -11,6 +11,7 @@ var rightArmSpeed;
 var leftArmIsMoving = false;
 var rightArmIsMoving = false;
 var ingredients = []
+const allIngredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese", "bun"]
 
 const burgerImg = new Image();
 burgerImg.src = '/static/burgerImg.png';
@@ -31,7 +32,7 @@ function startGame(uuid_) {
   rightArm = new createRightArm(window.innerWidth - 300, window.innerHeight / 2, 512, 120);
   belt = new createBelt(0, 130, window.innerWidth, 25);
   setInterval(updateCanvas, 20);
-  setInterval(addIngredient, 1000);
+  setInterval(addRandomIngredient, 1000);
 }
 
 
@@ -253,8 +254,11 @@ function updateCanvas() {
   }
 }
 
-function addIngredient() {
-  ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, burgerImg));
+function addRandomIngredient() {
+  const name = allIngredients[Math.floor(Math.random() * allIngredients.length)];
+  const img = new Image();
+  img.src = '/static/' + name + '.png';
+  ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, img));
 }
 
 function displayError(message) {
