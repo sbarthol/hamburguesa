@@ -181,6 +181,8 @@ gameCanvas.canvas.addEventListener('click', function(evt) {
     gameSocket.send(JSON.stringify({
         'ingredientId': clickedIngredient.id
     }));
+    // Todo: make hand x movement non screen dependent
+    // calculate the offset
     leftArm.fetchIngredient( {x: clickedIngredient.x + clickedIngredient.width + 100, y: clickedIngredient.y})
   }
   
