@@ -99,7 +99,7 @@ function createLeftArm(x, y, width, height) {
       this.y += speedVec.y;
 
       if(this.movingState == 1 && this.y < this.dest.y) {
-        this.dest = {x: window.innerWidth / 2, y: window.innerHeight - 130};
+        this.dest = {x: window.innerWidth / 2, y: this.startY};
         this.movingState = 2;
       } else if (this.movingState == 2 && this.y > this.dest.y) {
         this.dest = {x: this.startX, y: this.startY};
@@ -145,7 +145,7 @@ function createRightArm(x, y, width, height) {
       this.y += speedVec.y;
 
       if(this.movingState == 1 && this.y < this.dest.y) {
-        this.dest = {x: window.innerWidth / 2, y: window.innerHeight - 130};
+        this.dest = {x: window.innerWidth / 2, y: this.startY};
         this.movingState = 2;
       } else if (this.movingState == 2 && this.y > this.dest.y) {
         this.dest = {x: this.startX, y: this.startY};
