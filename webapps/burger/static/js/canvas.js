@@ -116,25 +116,44 @@ function createRightArm(x, y, width, height) {
   this.height = height;
   this.x = x;
   this.y = y;
+  this.startX = x;
+  this.startY = y;
 
   this.img = new Image();
   this.img.src = '/static/rightArm.png';
+
+  this.dest = null; // contains the dest of the upper right corner
+  this.movingState = 0; // 1 -> grab, 2 -> put down, 3 -> back to start pos
 
   this.draw = function() {
     ctx = gameCanvas.context;
     ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
   }
 
+
+  this.fetchIngredient = function(dest_) {
+    this.movingState = 1;
+    this.dest = dest_;
+  }
+
   this.move = function() {
-  
-  }
+    if(this.dest != null) {
+      const dirVec = {x: this.dest.x - this.x, y: this.dest.y - this.y};
+      const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
+      const speedVec = {x: 20 * dirVec.x / norm, y: 20 * dirVec.y / norm};
+      this.x += speedVec.x;
+      this.y += speedVec.y;
 
-  this.changeDir = function() {
-    
-  }
-
-  this.stop = function() {
-    
+      if(this.movingState == 1 && this.y < this.dest.y) {
+        this.dest = {x: window.innerWidth / 2, y: window.innerHeight - 130};
+        this.movingState = 2;
+      } else if (this.movingState == 2 && this.y > this.dest.y) {
+        this.dest = {x: this.startX, y: this.startY};
+        this.movingState = 3;
+      } else if (this.movingState == 3 && this.x > this.dest.x) {
+        this.dest = null;
+      }
+    }
   }
 }
 
@@ -158,10 +177,10 @@ gameCanvas.canvas.addEventListener('click', function(evt) {
       }
   }
   if(clickedIngredient != null) {
-    console.log("clicked on " + clickedIngredient.name);
-    /*gameSocket.send(JSON.stringify({
-        'pos': mousePos.y
-    }));*/
+    console.log("clicked on " + clickedIngredient.name + ", id = " + clickedIngredient.id);
+    gameSocket.send(JSON.stringify({
+        'ingredientId': clickedIngredient.id
+    }));
     leftArm.fetchIngredient( {x: clickedIngredient.x + clickedIngredient.width + 100, y: clickedIngredient.y})
   }
   
@@ -179,7 +198,17 @@ const gameSocket = new WebSocket(
 
 gameSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    console.log(data)
+    const ingredientId = data["ingredientId"];
+    console.log("received data " + e.data);
+    var clickedIngredient = null;
+    for(var i=0;i<ingredients.length;i++) {
+      if(ingredients[i].id == ingredientId) {
+        clickedIngredient = ingredients[i]
+      }
+    }
+    if(clickedIngredient != null) {
+      rightArm.fetchIngredient( {x: clickedIngredient.x + 100, y: clickedIngredient.y})
+    }
 };
 
 gameSocket.onclose = function(e) {
@@ -212,7 +241,7 @@ function updateCanvas() {
 }
 
 function addRandomIngredient() {
-  const name = allIngredients[Math.floor(Math.random() * allIngredients.length)];
+  const name = allIngredients[ingredientCounter % allIngredients.length];
   ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
 }
 
