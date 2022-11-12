@@ -6,7 +6,7 @@ import json
 from burger.forms import CreateForm
 from burger.models import Score
 from django.utils import timezone
-import time
+import asyncio
 
 room_name2uuids = {}
 uuid2websocket = {}
@@ -30,16 +30,15 @@ class Game:
       else:
         return self.uuids[0]
 
-    def send_next_ingredient_to_player(self):
+    async def send_next_ingredient_to_player(self):
       ingredient_id = self.next_ingredient_id
       self.next_ingredient_id = self.next_ingredient_id + 1
       ingredient_name = "cheese"
-      print(f'game state: sending {ingredient_name} to players')
       self.ingredient_id2ingredient[ingredient_id] = ingredient_name
       for uuid in self.uuids:
         ws = uuid2websocket[uuid]
-        ws.send(text_data=json.dumps({"message_type": "next_ingredient",
-                "ingredient_id": ingredient_id, "ingredient_name": ingredient_name}))
+        await ws.send(text_data=json.dumps({"message_type": "next_ingredient",
+                                            "ingredient_id": ingredient_id, "ingredient_name": ingredient_name}))
 
     def send_next_layer_to_player(self, uuid):
       ingredient_name = self.recipe[self.current_progress[uuid]]
@@ -47,15 +46,18 @@ class Game:
       ws.send(text_data=json.dumps(
           {"message_type": "next_layer", "ingredient_name": ingredient_name}))
 
+    async def send_next_ingredient_loop(self):
+      while (True):
+        await asyncio.sleep(1)
+        await self.send_next_ingredient_to_player()
+
     def start_game(self, uuids):
       self.uuids = uuids
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
       self.recipe = ["bun", "cheese", "tomato"]
       self.current_progress = {uuids[0]: 0, uuids[1]: 0}
-      print(f'game state: start game with {uuids}')
-      while (1):
-        time.sleep(1)
-        self.send_next_ingredient_to_player()
+      loop = asyncio.get_event_loop()
+      loop.create_task(self.send_next_ingredient_loop())
 
     def game_over(self, winner_uuid):
       winner_ws = uuid2websocket[winner_uuid]
@@ -105,12 +107,12 @@ def room(request, room_name):
 # maintain websocket channel names
 # communicate via websockets, not requests
 # call methods from consumer.py
-def player_pick_ingredient(ingredient_id, room_name, uuid):
+async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
   room_name2game[room_name].pick_ingredient(uuid, ingredient_id)
   other_uuid = get_other_uuid(room_name, uuid)
   ws = uuid2websocket[other_uuid]
-  ws.send(text_data=json.dumps(
+  await ws.send(text_data=json.dumps(
       {"message_type": "pick_ingredient", "ingredient_id": ingredient_id}))
 
 
@@ -122,11 +124,10 @@ def get_other_uuid(room_name, uuid):
     return room_name2uuids[room_name][0]
 
 
-def register_websocket(uuid, ws):
+async def register_websocket(uuid, ws):
   print(f'register_websocket({uuid})')
   uuid2websocket[uuid] = ws
   room_name = uuid2room_name[uuid]
-  print(room_name2uuids[room_name])
   if (len(room_name2uuids[room_name]) == 2):
     for old_uuid in room_name2uuids[room_name]:
       ws = uuid2websocket[old_uuid]
@@ -136,12 +137,10 @@ def register_websocket(uuid, ws):
     other_uuid = room_name2uuids[room_name][0]
     assert (other_uuid in uuid2websocket)
     other_ws = uuid2websocket[other_uuid]
-    other_ws.send(text_data=json.dumps({"message_type": "start_game"}))
+    await other_ws.send(text_data=json.dumps({"message_type": "start_game"}))
 
     room_name2uuids[room_name].append(uuid)
-    ws.send(text_data=json.dumps({"message_type": "start_game"}))
-
-    # this line will block until the end of the game
+    await ws.send(text_data=json.dumps({"message_type": "start_game"}))
     room_name2game[room_name].start_game([uuid, other_uuid])
   else:
     room_name2uuids[room_name] = [uuid]
