@@ -70,6 +70,10 @@ def register_websocket(uuid, ws):
     room_name2uuids[room_name] = [uuid]
 
 # TODO: add security measures.
+# yes, the server will maintain the game logic
+# and will know which player won
+# instead of exposing a route to the clieint, the server
+# will simply update the DB at the end of the game
 def submit_score(request):
     if request.method == 'GET':
         c = CreateForm()
