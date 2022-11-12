@@ -7,7 +7,6 @@ var gameSocket;
 var uuid;
 var updateCanvasInterval;
 var gameIsStarted;
-const allIngredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese", "bun"];
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
@@ -252,15 +251,17 @@ function createGameSocket(roomName, callback) {
 
 	gameSocket.onmessage = function (e) {
 		const data = JSON.parse(e.data);
-		console.log("received data " + e.data);
+		
 
 		if (data["message_type"] == undefined) {
 			console.error("message_type field is not set");
 			return;
 		}
 		if (data["message_type"] == "start_game") {
+			console.log("received data " + e.data);
 			startGame();
 		} else if (data["message_type"] == "pick_ingredient") {
+			console.log("received data " + e.data);
 			const ingredientId = data["ingredient_id"];
 			var clickedIngredient = null;
 			for (var i = 0; i < ingredients.length; i++) {
@@ -275,8 +276,11 @@ function createGameSocket(roomName, callback) {
 			const name = data["ingredient_name"];
 			ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
 		} else if (data["message_type"] == "next_layer") {
+			console.log("received data " + e.data);
 		} else if (data["message_type"] == "game_over_win") {
+			console.log("received data " + e.data);
 		} else if (data["message_type"] == "game_over_lose") {
+			console.log("received data " + e.data);
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}
