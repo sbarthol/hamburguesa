@@ -6,7 +6,7 @@ var ingredientCounter;
 var gameSocket;
 var uuid;
 var updateCanvasInterval;
-var addRandomIngredientInterval;
+var gameIsStarted;
 const allIngredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese", "bun"];
 
 function init(uuid_, roomName_) {
@@ -22,6 +22,7 @@ function init(uuid_, roomName_) {
 	gameCanvas.init();
 
 	ingredients = [];
+	gameIsStarted = false;
 	leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
 	rightArm = new createRightArm(
 		gameCanvas.canvas.width - 150,
@@ -35,17 +36,17 @@ function init(uuid_, roomName_) {
 	leftArm.draw();
 	rightArm.draw();
 
-  //https://www.1001fonts.com/mouse-memoirs-font.html
-  var f = new FontFace('MouseMemoirs', 'url(/static/MouseMemoirs-Regular.ttf)');
-  f.load().then(function(font) {
-    // Add font on the html page
-    document.fonts.add(font);
-    drawText("Waiting for other player...");
-  });
+	//https://www.1001fonts.com/mouse-memoirs-font.html
+	var f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
+	f.load().then(function (font) {
+		// Add font on the html page
+		document.fonts.add(font);
+		drawText("Waiting for other player...");
+	});
 }
 
 function drawText(text) {
-  ctx = gameCanvas.context;
+	ctx = gameCanvas.context;
 	ctx.font = "100px MouseMemoirs";
 	ctx.fillStyle = "white";
 	textWidth = ctx.measureText(text).width;
@@ -58,10 +59,9 @@ function drawText(text) {
 function startGame() {
 	ingredients = [];
 	ingredientCounter = 1;
+	gameIsStarted = true;
 	clearInterval(updateCanvasInterval);
-	clearInterval(addRandomIngredientInterval);
 	updateCanvasInterval = setInterval(updateCanvas, 20);
-	addRandomIngredientInterval = setInterval(addRandomIngredient, 1000);
 }
 
 var gameCanvas = {
@@ -255,6 +255,7 @@ function createGameSocket(roomName, callback) {
 		console.log("received data " + e.data);
 
 		if (data["message_type"] == undefined) {
+			console.error("message_type field is not set");
 			return;
 		}
 		if (data["message_type"] == "start_game") {
@@ -270,19 +271,34 @@ function createGameSocket(roomName, callback) {
 			if (clickedIngredient != null) {
 				rightArm.fetchIngredient({ x: clickedIngredient.x + 100, y: clickedIngredient.y });
 			}
+		} else if (data["message_type"] == "next_ingredient") {
+			const name = data["ingredient_name"];
+			ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
+		} else if (data["message_type"] == "next_layer") {
+		} else if (data["message_type"] == "game_over_win") {
+		} else if (data["message_type"] == "game_over_lose") {
+		} else {
+			console.error("unhandled message_type: " + data["message_type"]);
 		}
 	};
 	gameSocket.onclose = function (e) {
 		console.error("socket closed unexpectedly");
 
 		clearInterval(updateCanvasInterval);
-		clearInterval(addRandomIngredientInterval);
 
-		ctx = gameCanvas.context;
+		if (!gameIsStarted) {
+			ctx = gameCanvas.context;
+			ctx.clearRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+
+			belt.draw();
+			leftArm.draw();
+			rightArm.draw();
+		}
+
 		ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 
-    drawText("Oops, something went wrong...");
+		drawText("Oops, something went wrong...");
 	};
 	gameSocket.onopen = function (e) {
 		callback();
@@ -313,9 +329,4 @@ function updateCanvas() {
 	}
 	leftArm.draw();
 	rightArm.draw();
-}
-
-function addRandomIngredient() {
-	const name = allIngredients[ingredientCounter % allIngredients.length];
-	ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
 }
