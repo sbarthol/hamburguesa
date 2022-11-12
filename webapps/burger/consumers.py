@@ -4,6 +4,7 @@ import json
 
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+from burger import views
 
 
 class GameConsumer(WebsocketConsumer):
@@ -26,23 +27,20 @@ class GameConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket
     def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        ingredientId = text_data_json["ingredientId"]
-        # print(f'user {self.channel_name} send {pos}')
-
         # Send message to room group
+        data = json.loads(text_data)
+        data["type"] = "game_message"
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "game_message", "ingredientId": ingredientId, "from": self.channel_name}
+            self.room_group_name, data
         )
 
     # Receive message from room group
-    def game_message(self, event):
-        ingredientId = event["ingredientId"]
-        from_name = event["from"]
-        # print(f'socket {self.channel_name} receive {ingredientId} from {from_name}')
-
-
-        # Send message to WebSocket
-        if from_name != self.channel_name:
-            # print(f'send {ingredientId} to user {self.channel_name} ')
-            self.send(text_data=json.dumps({"ingredientId": ingredientId}))
+    def game_message(self, data):
+        print(f'game_message({data})')
+        message_type = data["message_type"]
+        if(message_type == "register"):
+            views.register_websocket(data["uuid"], self)
+        elif(message_type == "pick_ingredient"):
+            views.user_pick_ingredient(data["ingredient_id"], self.room_name, data["uuid"])
+                
+        
