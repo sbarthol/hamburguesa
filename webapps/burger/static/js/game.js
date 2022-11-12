@@ -281,6 +281,8 @@ function createGameSocket(roomName, callback) {
 		ctx = gameCanvas.context;
 		ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+
+    drawText("Oops, something went wrong...");
 	};
 	gameSocket.onopen = function (e) {
 		callback();
