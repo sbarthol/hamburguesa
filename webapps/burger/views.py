@@ -3,22 +3,24 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 import uuid
 
-uuids = []
-
-def register_player(request):
-  if len(uuids) == 2:
-    return HttpResponse("there are already two players registered", status = 400)
-  new_uuid = str(uuid.uuid4())
-  uuids.append(new_uuid)
-  return render(request, 'game.html', {"uuid": new_uuid})
+room2uuids = {} # room name -> uuid list
 
 def index(request):
   return render(request, "index.html")
 
 def room(request, room_name):
-  # if len(uuids) == 2:
-  #   return HttpResponse("there are already two players registered", status = 400)
+
+  # if more than two players join
+  # last two will be considered
   new_uuid = str(uuid.uuid4())
-  uuids.append(new_uuid)
+  if (not room_name in room2uuids):
+    room2uuids[room_name] = [new_uuid]
+  elif(len(room2uuids[room_name]) == 1):
+    room2uuids[room_name].append(new_uuid)
+  else:
+    room2uuids[room_name] = room2uuids[room_name][1:]
+    room2uuids[room_name].append(new_uuid)
+
+  print(f'uuids = {room2uuids}')
+
   return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name})
-  # return render(request, "room.html", {"room_name": room_name})
