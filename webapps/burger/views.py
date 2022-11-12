@@ -2,15 +2,15 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 import uuid
+import json
+from burger.forms import CreateForm
+from burger.models import Score
+from django.utils import timezone
 
 room_name2uuids = {} # room name -> uuid list
 uuid2websocket = {}
 uuid2room_name = {}
 
-from burger.forms import CreateForm
-from burger.models import Score
-
-from django.utils import timezone
 
 def index(request):
   return render(request, "index.html")
@@ -62,10 +62,8 @@ def register_websocket(uuid, ws):
     other_uuid = room_name2uuids[room_name][0]
     assert(other_uuid in uuid2websocket)
     other_ws = uuid2websocket[other_uuid]
-    print("sending start to other_ws")
     other_ws.send(text_data=json.dumps({"message_type": "start_game"}))
 
-    print("sending start to ws")
     room_name2uuids[room_name].append(uuid)
     ws.send(text_data=json.dumps({"message_type": "start_game"}))  
   else:
