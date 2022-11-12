@@ -35,14 +35,24 @@ function init(uuid_, roomName_) {
 	leftArm.draw();
 	rightArm.draw();
 
-	ctx = gameCanvas.context;
-	ctx.font = "200px serif";
+  //https://www.1001fonts.com/mouse-memoirs-font.html
+  var f = new FontFace('MouseMemoirs', 'url(/static/MouseMemoirs-Regular.ttf)');
+  f.load().then(function(font) {
+    // Add font on the html page
+    document.fonts.add(font);
+    drawText("Waiting for other player...");
+  });
+}
+
+function drawText(text) {
+  ctx = gameCanvas.context;
+	ctx.font = "100px MouseMemoirs";
 	ctx.fillStyle = "white";
-	textWidth = ctx.measureText("Hello world").width;
-	ctx.fillText("Hello world", gameCanvas.canvas.width / 2 - textWidth / 2, gameCanvas.canvas.height / 2);
+	textWidth = ctx.measureText(text).width;
+	ctx.fillText(text, gameCanvas.canvas.width / 2 - textWidth / 2, gameCanvas.canvas.height / 2);
 	ctx.fillStyle = "black";
 	ctx.lineWidth = 3;
-	ctx.strokeText("Hello world", gameCanvas.canvas.width / 2 - textWidth / 2, gameCanvas.canvas.height / 2);
+	ctx.strokeText(text, gameCanvas.canvas.width / 2 - textWidth / 2, gameCanvas.canvas.height / 2);
 }
 
 function startGame() {
