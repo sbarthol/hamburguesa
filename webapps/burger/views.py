@@ -17,12 +17,7 @@ def room(request, room_name):
   # last two will be considered
   new_uuid = str(uuid.uuid4())
   if (not room_name in room_name2uuids):
-    room_name2uuids[room_name] = [new_uuid]
-  elif(len(room_name2uuids[room_name]) == 1):
-    room_name2uuids[room_name].append(new_uuid)
-  else:
-    room_name2uuids[room_name] = room_name2uuids[room_name][1:]
-    room_name2uuids[room_name].append(new_uuid)
+    room_name2uuids[room_name] = []
 
   uuid2room_name[new_uuid] = room_name
 
@@ -35,12 +30,12 @@ def room(request, room_name):
 # maintain websocket channel names
 # communicate via websockets, not requests
 # call methods from consumer.py
-def user_pick_ingredient(ingredient_id, room_name, uuid):
-  print(f'user_pick_ingredient({ingredient_id, room_name, uuid})')
+def player_pick_ingredient(ingredient_id, room_name, uuid):
+  print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
   other_uuid = get_other_uuid(room_name, uuid)
   ws = uuid2websocket[other_uuid]
   ws.send(text_data=json.dumps({"message_type": "pick_ingredient", "ingredient_id": ingredient_id}))
-
+    
 
 def get_other_uuid(room_name, uuid):
   assert(len(room_name2uuids[room_name]) == 2)
@@ -53,13 +48,26 @@ def register_websocket(uuid, ws):
   print(f'register_websocket({uuid})')
   uuid2websocket[uuid] = ws
   room_name = uuid2room_name[uuid]
+  print(room_name2uuids[room_name])
   if(len(room_name2uuids[room_name]) == 2):
-    other_uuid = get_other_uuid(room_name, uuid)
-    if(other_uuid in uuid2websocket):
-      ws1 = uuid2websocket[other_uuid]
-      ws1.send(text_data=json.dumps({"message_type": "start_game"}))
-      ws2 = uuid2websocket[uuid]
-      ws2.send(text_data=json.dumps({"message_type": "start_game"}))
+    for old_uuid in room_name2uuids[room_name]:
+      ws = uuid2websocket[old_uuid]
+      ws.close()
+    room_name2uuids[room_name] = [uuid]
+  elif(len(room_name2uuids[room_name]) == 1):
+    other_uuid = room_name2uuids[room_name][0]
+    assert(other_uuid in uuid2websocket)
+    other_ws = uuid2websocket[other_uuid]
+    print("sending start to other_ws")
+    other_ws.send(text_data=json.dumps({"message_type": "start_game"}))
+
+    print("sending start to ws")
+    room_name2uuids[room_name].append(uuid)
+    ws.send(text_data=json.dumps({"message_type": "start_game"}))  
+  else:
+    room_name2uuids[room_name] = [uuid]
+
+
 
 def send_next_ingredient(ingredient_id, room_name, uuid):
   print(f'add_ingredient({ingredient_id, room_name, uuid})')

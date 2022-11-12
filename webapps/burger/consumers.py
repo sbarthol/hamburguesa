@@ -30,17 +30,19 @@ class GameConsumer(WebsocketConsumer):
         # Send message to room group
         data = json.loads(text_data)
         data["type"] = "game_message"
+        data["from"] = self.channel_name
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, data
         )
 
     # Receive message from room group
     def game_message(self, data):
-        print(f'game_message({data})')
-        message_type = data["message_type"]
-        if(message_type == "register"):
-            views.register_websocket(data["uuid"], self)
-        elif(message_type == "pick_ingredient"):
-            views.user_pick_ingredient(data["ingredient_id"], self.room_name, data["uuid"])
+        if data["from"] == self.channel_name:
+            print(f'game_message({data})')
+            message_type = data["message_type"]
+            if(message_type == "register"):
+                views.register_websocket(data["uuid"], self)
+            elif(message_type == "pick_ingredient"):
+                views.player_pick_ingredient(data["ingredient_id"], self.room_name, data["uuid"])
                 
         

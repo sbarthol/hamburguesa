@@ -19,15 +19,20 @@ function init(uuid_, roomName_) {
     }));
   })
   gameCanvas.init();
+  
+  ingredients = []
   leftArm = new createLeftArm(-350, window.innerHeight - 150, 512, 120);
   rightArm = new createRightArm(window.innerWidth - 150, window.innerHeight - 150, 512, 120);
   belt = new createBelt(0, 130, window.innerWidth, 25);
+
+  belt.draw();
+  leftArm.draw();
+  rightArm.draw();
 }
 
 function startGame() {
   ingredients = []
   ingredientCounter = 1
-  console.log("here")
   clearInterval(updateCanvasInterval)
   clearInterval(addRandomIngredientInterval)
   updateCanvasInterval = setInterval(updateCanvas, 20);
@@ -222,11 +227,9 @@ function createGameSocket(roomName, callback) {
     console.log("received data " + e.data);
 
     if(data["message_type"] == undefined) {
-      console.log("message_type undefined");
       return;
     }
     if(data["message_type"] == "start_game") {
-      console.log("here");
       startGame();
     } else if(data["message_type"] == "pick_ingredient") {
       const ingredientId = data["ingredient_id"];
@@ -242,7 +245,15 @@ function createGameSocket(roomName, callback) {
     }
   };
   gameSocket.onclose = function(e) {
-    console.error('Socket closed unexpectedly');
+    console.error('socket closed unexpectedly');
+
+    clearInterval(updateCanvasInterval)
+    clearInterval(addRandomIngredientInterval)
+
+    ctx = gameCanvas.context;
+    ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
   };
   gameSocket.onopen = function(e) {
     callback();
