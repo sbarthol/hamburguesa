@@ -2,27 +2,47 @@
 var leftArm;
 var rightArm;
 var belt;
-var ingredients = []
-var ingredientCounter = 1
+var ingredients
+var ingredientCounter
 var gameSocket
+var uuid
+var updateCanvasInterval
+var addRandomIngredientInterval
 const allIngredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese", "bun"]
 
-// Todo: what to do with the uuid
-function startGame(uuid_, roomName_) {
-
-  gameSocket = createGameSocket(roomName_)
-  gameCanvas.start();
+function init(uuid_, roomName_) {
+  this.uuid = uuid_
+  gameSocket = createGameSocket(roomName_, () => {
+    gameSocket.send(JSON.stringify({
+      'message_type': 'register',
+      'uuid': uuid,
+    }));
+  })
+  gameCanvas.init();
+  
+  ingredients = []
   leftArm = new createLeftArm(-350, window.innerHeight - 150, 512, 120);
   rightArm = new createRightArm(window.innerWidth - 150, window.innerHeight - 150, 512, 120);
   belt = new createBelt(0, 130, window.innerWidth, 25);
-  setInterval(updateCanvas, 20);
-  setInterval(addRandomIngredient, 1000);
+
+  belt.draw();
+  leftArm.draw();
+  rightArm.draw();
+}
+
+function startGame() {
+  ingredients = []
+  ingredientCounter = 1
+  clearInterval(updateCanvasInterval)
+  clearInterval(addRandomIngredientInterval)
+  updateCanvasInterval = setInterval(updateCanvas, 20);
+  addRandomIngredientInterval = setInterval(addRandomIngredient, 1000);
 }
 
 var gameCanvas = {
   canvas: document.createElement("canvas"),
   context: null,
-  start: function() {
+  init: function() {
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
     this.context = this.canvas.getContext("2d");
@@ -182,7 +202,9 @@ gameCanvas.canvas.addEventListener('click', function(evt) {
   if(clickedIngredient != null) {
     console.log("clicked on " + clickedIngredient.name + ", id = " + clickedIngredient.id);
     gameSocket.send(JSON.stringify({
-        'ingredientId': clickedIngredient.id
+        'ingredient_id': clickedIngredient.id,
+        'message_type': 'pick_ingredient',
+        'uuid': uuid
     }));
     // Todo: make hand x movement non screen dependent
     // calculate the offset
@@ -191,7 +213,7 @@ gameCanvas.canvas.addEventListener('click', function(evt) {
   
 }, false);
 
-function createGameSocket(roomName) {
+function createGameSocket(roomName, callback) {
   const gameSocket = new WebSocket(
     'ws://'
     + window.location.host
@@ -202,21 +224,39 @@ function createGameSocket(roomName) {
 
   gameSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    const ingredientId = data["ingredientId"];
     console.log("received data " + e.data);
-    var clickedIngredient = null;
-    for(var i=0;i<ingredients.length;i++) {
-      if(ingredients[i].id == ingredientId) {
-        clickedIngredient = ingredients[i]
+
+    if(data["message_type"] == undefined) {
+      return;
+    }
+    if(data["message_type"] == "start_game") {
+      startGame();
+    } else if(data["message_type"] == "pick_ingredient") {
+      const ingredientId = data["ingredient_id"];
+      var clickedIngredient = null;
+      for(var i=0;i<ingredients.length;i++) {
+        if(ingredients[i].id == ingredientId) {
+          clickedIngredient = ingredients[i]
+        }
+      }
+      if(clickedIngredient != null) {
+        rightArm.fetchIngredient( {x: clickedIngredient.x + 100, y: clickedIngredient.y})
       }
     }
-    if(clickedIngredient != null) {
-      rightArm.fetchIngredient( {x: clickedIngredient.x + 100, y: clickedIngredient.y})
-    }
   };
-
   gameSocket.onclose = function(e) {
-    console.error('Socket closed unexpectedly');
+    console.error('socket closed unexpectedly');
+
+    clearInterval(updateCanvasInterval)
+    clearInterval(addRandomIngredientInterval)
+
+    ctx = gameCanvas.context;
+    ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+  };
+  gameSocket.onopen = function(e) {
+    callback();
   };
   return gameSocket;
 }
