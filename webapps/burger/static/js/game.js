@@ -10,6 +10,8 @@ var updateCanvasInterval;
 var gameIsStarted;
 var gameIsOver;
 
+// Todo: solve image loading problems
+
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
 	gameSocket = createGameSocket(roomName_, () => {
