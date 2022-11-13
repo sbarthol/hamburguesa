@@ -1,6 +1,4 @@
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.shortcuts import render
 import uuid
 import json
 from burger.forms import CreateForm
