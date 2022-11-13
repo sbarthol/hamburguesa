@@ -84,7 +84,7 @@ function createTV(x, y, width, height) {
 	this.height = height;
 	this.x = x;
 	this.y = y;
-	
+
 	this.ingredientImg = undefined;
 
 	this.tvImg = new Image();
@@ -93,7 +93,7 @@ function createTV(x, y, width, height) {
 	this.scrambledImg = new Image();
 	this.scrambledImg.src = "/static/scrambled.png";
 
-	this.setIngredient = function(name) {
+	this.setIngredient = function (name) {
 		this.ingredientImg = new Image();
 		this.ingredientImg.src = "/static/" + name + ".png";
 	};
@@ -102,15 +102,21 @@ function createTV(x, y, width, height) {
 		this.ingredientImg = undefined;
 	};
 
-	this.draw = function() {
+	this.draw = function () {
 		ctx = gameCanvas.context;
-		if(this.ingredientImg == undefined) {
-			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50 , this.height - 85);
+		if (this.ingredientImg == undefined) {
+			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 		} else {
 			ctx.fillStyle = "yellow";
-			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50 , this.height - 85);
-			offset = 60
-			ctx.drawImage(this.ingredientImg, this.x + offset, this.y + offset, this.width - 2 * offset, this.height - 2 * offset);
+			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50, this.height - 85);
+			offset = 60;
+			ctx.drawImage(
+				this.ingredientImg,
+				this.x + offset,
+				this.y + offset,
+				this.width - 2 * offset,
+				this.height - 2 * offset
+			);
 		}
 		ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
 	};
@@ -292,11 +298,11 @@ function createGameSocket(roomName, callback) {
 	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
 
 	gameSocket.onmessage = function (e) {
-		if(gameIsOver) {
+		if (gameIsOver) {
 			return;
 		}
 		const data = JSON.parse(e.data);
-		
+
 		if (data["message_type"] == undefined) {
 			console.error("message_type field is not set");
 			return;
@@ -322,7 +328,9 @@ function createGameSocket(roomName, callback) {
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
 			tv.removeIngredient();
-			setTimeout(() => {tv.setIngredient(data["ingredient_name"]);}, 1000)
+			setTimeout(() => {
+				tv.setIngredient(data["ingredient_name"]);
+			}, 1000);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
 			clearInterval(updateCanvasInterval);
@@ -347,7 +355,7 @@ function createGameSocket(roomName, callback) {
 	};
 	gameSocket.onclose = function (e) {
 		console.error("socket closed unexpectedly");
-		if(gameIsOver) {
+		if (gameIsOver) {
 			return;
 		}
 
@@ -397,5 +405,4 @@ function updateCanvas() {
 	}
 	leftArm.draw();
 	rightArm.draw();
-
 }
