@@ -90,6 +90,9 @@ function createTV(x, y, width, height) {
 	this.tvImg = new Image();
 	this.tvImg.src = "/static/tv.png";
 
+	this.scrambledImg = new Image();
+	this.scrambledImg.src = "/static/scrambled.png";
+
 	this.setIngredient = function(name) {
 		this.ingredientImg = new Image();
 		this.ingredientImg.src = "/static/" + name + ".png";
@@ -102,15 +105,14 @@ function createTV(x, y, width, height) {
 	this.draw = function() {
 		ctx = gameCanvas.context;
 		if(this.ingredientImg == undefined) {
-			ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
-			// Todo: parasite screen
+			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50 , this.height - 85);
 		} else {
 			ctx.fillStyle = "yellow";
 			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50 , this.height - 85);
-			ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
 			offset = 60
 			ctx.drawImage(this.ingredientImg, this.x + offset, this.y + offset, this.width - 2 * offset, this.height - 2 * offset);
 		}
+		ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
 	};
 }
 
@@ -319,7 +321,8 @@ function createGameSocket(roomName, callback) {
 			ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
-			tv.setIngredient(data["ingredient_name"]);
+			tv.removeIngredient();
+			setTimeout(() => {tv.setIngredient(data["ingredient_name"]);}, 1000)
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
 			clearInterval(updateCanvasInterval);
