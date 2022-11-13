@@ -81,12 +81,31 @@ var gameCanvas = {
 };
 
 function createTV(x, y, width, height) {
+
+	function createTVContent(name, parent) {
+
+		this.img = new Image();
+		this.img.src = "/static/" + name + ".png";
+
+		x_offset = 50;
+		y_offset = 20;
+		this.x = parent.x + x_offset;
+		this.width = parent.width - 2 * x_offset;
+		this.height = this.width * this.img.height / this.img.width;
+		this.y = parent.y + (parent.height - this.height) / 2 + y_offset;
+	
+		this.draw = function () {
+			ctx = gameCanvas.context;
+			ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+		};
+	}
+
 	this.width = width;
 	this.height = height;
 	this.x = x;
 	this.y = y;
 
-	this.ingredientImg = undefined;
+	this.content = undefined;
 
 	this.tvImg = new Image();
 	this.tvImg.src = "/static/tv.png";
@@ -95,44 +114,37 @@ function createTV(x, y, width, height) {
 	this.scrambledImg.src = "/static/scrambled.png";
 
 	this.setIngredient = function (name) {
-		this.ingredientImg = new Image();
-		this.ingredientImg.src = "/static/" + name + ".png";
+		this.content = new createTVContent(name, this);
 	};
 
 	this.removeIngredient = function () {
-		this.ingredientImg = undefined;
+		this.content = undefined;
 	};
 
 	this.draw = function () {
 		ctx = gameCanvas.context;
-		if (this.ingredientImg == undefined) {
+		if (this.content == undefined) {
 			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 		} else {
 			// Todo: add more pastel color variety
 			ctx.fillStyle = "yellow";
 			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50, this.height - 85);
-			offset = 60;
-			ctx.drawImage(
-				this.ingredientImg,
-				this.x + offset,
-				this.y + offset,
-				this.width - 2 * offset,
-				this.height - 2 * offset
-			);
+			this.content.draw();
 		}
 		ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
 	};
 }
 
-function createIngredient(x, y, width, height, name) {
+function createIngredient(x, bottom_y, width, name) {
 	this.width = width;
-	this.height = height;
 	this.x = x;
-	this.y = y;
 	this.name = name;
 
 	this.img = new Image();
 	this.img.src = "/static/" + name + ".png";
+
+	this.height = width * this.img.height / this.img.width;
+	this.y = bottom_y - this.height;
 
 	this.id = ingredientCounter++;
 
@@ -334,7 +346,7 @@ function createGameSocket(roomName, callback) {
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
-			ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
+			ingredients.push(new createIngredient(-100, belt.y, 100, name));
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
 			tv.removeIngredient();
