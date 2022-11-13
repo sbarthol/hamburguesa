@@ -141,7 +141,7 @@ async def register_websocket(uuid, ws):
   if (len(room_name2uuids[room_name]) == 2):
     for old_uuid in room_name2uuids[room_name]:
       ws = uuid2websocket[old_uuid]
-      ws.close()
+      await ws.close()
     room_name2uuids[room_name] = [uuid]
   elif (len(room_name2uuids[room_name]) == 1):
     other_uuid = room_name2uuids[room_name][0]
