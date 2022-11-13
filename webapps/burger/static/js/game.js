@@ -296,6 +296,13 @@ gameCanvas.canvas.addEventListener(
 	false
 );
 
+window.addEventListener(
+	"beforeunload",
+	function () {
+		gameSocket.close();
+	}
+);
+
 function createGameSocket(roomName, callback) {
 	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
 

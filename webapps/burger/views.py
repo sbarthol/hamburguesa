@@ -124,6 +124,11 @@ def get_other_uuid(room_name, uuid):
   else:
     return room_name2uuids[room_name][0]
 
+async def disconnect(room_name):
+  for uuid in room_name2uuids[room_name]:
+    ws = uuid2websocket[uuid]
+    await ws.close()
+
 
 async def register_websocket(uuid, ws):
   print(f'register_websocket({uuid})')
