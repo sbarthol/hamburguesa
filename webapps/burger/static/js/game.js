@@ -107,6 +107,7 @@ function createTV(x, y, width, height) {
 		if (this.ingredientImg == undefined) {
 			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 		} else {
+			// Todo: add more pastel color variety
 			ctx.fillStyle = "yellow";
 			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 			offset = 60;
