@@ -36,13 +36,14 @@ function init(uuid_, roomName_) {
 	belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
 	tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
 
-	belt.draw();
-	leftArm.draw();
-	rightArm.draw();
-
 	//https://www.1001fonts.com/mouse-memoirs-font.html
 	var f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
 	f.load().then(function (font) {
+		// Draw here to give some time to load the png
+		// Todo: is there a cleaner way
+		belt.draw();
+		leftArm.draw();
+		rightArm.draw();
 		// Add font on the html page
 		document.fonts.add(font);
 		drawText("Waiting for other player...");
