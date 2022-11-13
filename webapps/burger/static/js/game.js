@@ -12,6 +12,7 @@ var gameIsOver;
 
 // Todo: solve image loading problems
 // Todo: can we download everything in advance
+// Todo: when game is over, let the player put the last ingredient before freezing
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
