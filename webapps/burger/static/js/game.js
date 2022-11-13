@@ -299,6 +299,7 @@ gameCanvas.canvas.addEventListener(
 window.addEventListener(
 	"beforeunload",
 	function () {
+		gameIsOver = true;
 		gameSocket.close();
 	}
 );
