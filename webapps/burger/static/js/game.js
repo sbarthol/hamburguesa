@@ -11,6 +11,7 @@ var gameIsStarted;
 var gameIsOver;
 
 // Todo: solve image loading problems
+// Todo: can we download everything in advance
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
