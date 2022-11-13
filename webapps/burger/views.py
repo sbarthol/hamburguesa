@@ -97,15 +97,7 @@ def index(request):
 
 
 def room(request, room_name):
-
-  # if more than two players join
-  # last two will be considered
   new_uuid = str(uuid.uuid4())
-  if (not room_name in room_name2uuids):
-    room_name2uuids[room_name] = []
-  if (not room_name in room_name2game):
-    room_name2game[room_name] = Game()
-
   uuid2room_name[new_uuid] = room_name
 
   print(f'room_name2uuids = {room_name2uuids}')
@@ -138,12 +130,13 @@ async def register_websocket(uuid, ws):
   print(f'register_websocket({uuid})')
   uuid2websocket[uuid] = ws
   room_name = uuid2room_name[uuid]
-  if (len(room_name2uuids[room_name]) == 2):
+  if (room_name in room_name2uuids and len(room_name2uuids[room_name]) == 2):
     for old_uuid in room_name2uuids[room_name]:
       ws = uuid2websocket[old_uuid]
       await ws.close()
     room_name2uuids[room_name] = [uuid]
-  elif (len(room_name2uuids[room_name]) == 1):
+    room_name2game[room_name] = Game()
+  elif (room_name in room_name2uuids and len(room_name2uuids[room_name]) == 1):
     other_uuid = room_name2uuids[room_name][0]
     assert (other_uuid in uuid2websocket)
     other_ws = uuid2websocket[other_uuid]
@@ -154,6 +147,7 @@ async def register_websocket(uuid, ws):
     await room_name2game[room_name].start_game([uuid, other_uuid])
   else:
     room_name2uuids[room_name] = [uuid]
+    room_name2game[room_name] = Game()
 
 # TODO: add security measures.
 # yes, the server will maintain the game logic

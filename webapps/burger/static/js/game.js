@@ -7,6 +7,7 @@ var gameSocket;
 var uuid;
 var updateCanvasInterval;
 var gameIsStarted;
+var gameIsOver;
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
@@ -22,6 +23,7 @@ function init(uuid_, roomName_) {
 
 	ingredients = [];
 	gameIsStarted = false;
+	gameIsOver = false;
 	leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
 	rightArm = new createRightArm(
 		gameCanvas.canvas.width - 150,
@@ -250,9 +252,11 @@ function createGameSocket(roomName, callback) {
 	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
 
 	gameSocket.onmessage = function (e) {
+		if(gameIsOver) {
+			return;
+		}
 		const data = JSON.parse(e.data);
 		
-
 		if (data["message_type"] == undefined) {
 			console.error("message_type field is not set");
 			return;
@@ -279,14 +283,31 @@ function createGameSocket(roomName, callback) {
 			console.log("received data " + e.data);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
+			clearInterval(updateCanvasInterval);
+
+			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+			ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+
+			drawText("You win!");
+			gameIsOver = true;
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
+			clearInterval(updateCanvasInterval);
+
+			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+			ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+
+			drawText("You lose!");
+			gameIsOver = true;
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}
 	};
 	gameSocket.onclose = function (e) {
 		console.error("socket closed unexpectedly");
+		if(gameIsOver) {
+			return;
+		}
 
 		clearInterval(updateCanvasInterval);
 
