@@ -11,6 +11,8 @@ var gameIsStarted;
 var gameIsOver;
 
 // Todo: solve image loading problems
+// Todo: can we download everything in advance
+// Todo: when game is over, let the player put the last ingredient before freezing
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
@@ -83,9 +85,7 @@ var gameCanvas = {
 };
 
 function createTV(x, y, width, height) {
-
 	function createTVContent(name, parent) {
-
 		this.img = new Image();
 		this.img.src = "/static/" + name + ".png";
 
@@ -93,9 +93,9 @@ function createTV(x, y, width, height) {
 		y_offset = 20;
 		this.x = parent.x + x_offset;
 		this.width = parent.width - 2 * x_offset;
-		this.height = this.width * this.img.height / this.img.width;
+		this.height = (this.width * this.img.height) / this.img.width;
 		this.y = parent.y + (parent.height - this.height) / 2 + y_offset;
-	
+
 		this.draw = function () {
 			ctx = gameCanvas.context;
 			ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -145,13 +145,29 @@ function createIngredient(x, bottom_y, width, name) {
 	this.img = new Image();
 	this.img.src = "/static/" + name + ".png";
 
-	this.height = width * this.img.height / this.img.width;
+	this.height = (width * this.img.height) / this.img.width;
 	this.y = bottom_y - this.height;
 
 	this.id = ingredientCounter++;
+	this.grabbingArm = undefined;
+
+	this.grab = function (arm) {
+		this.grabbingArm = arm;
+	};
+
+	this.release = function () {
+		this.grabbingArm = undefined;
+		this.x = gameCanvas.canvas.width;
+	};
 
 	this.move = function () {
-		this.x += 3.0;
+		if (this.grabbingArm != undefined) {
+			const speedVec = this.grabbingArm.getSpeedVec();
+			this.x += speedVec.x;
+			this.y += speedVec.y;
+		} else {
+			this.x += 3.0;
+		}
 	};
 
 	this.draw = function () {
@@ -190,30 +206,44 @@ function createLeftArm(x, y, width, height) {
 	this.dest = null; // contains the dest of the upper right corner
 	this.movingState = 0; // 1 -> grab, 2 -> put down, 3 -> back to start pos
 
+	this.fetchedIngredient = undefined;
+
 	this.draw = function () {
 		ctx = gameCanvas.context;
 		ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
 	};
 
-	this.fetchIngredient = function (dest_) {
+	this.fetchIngredient = function (ingredient) {
+		this.dest = {
+			x: ingredient.x + ingredient.width + 100,
+			y: ingredient.y,
+		};
 		this.movingState = 1;
-		this.dest = dest_;
+		this.fetchedIngredient = ingredient;
+	};
+
+	this.getSpeedVec = function () {
+		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
+		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
+		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+		return speedVec;
 	};
 
 	this.move = function () {
 		if (this.dest != null) {
-			const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
-			const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
-			const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+			const speedVec = this.getSpeedVec();
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
 				this.dest = { x: gameCanvas.canvas.width / 2, y: this.startY };
 				this.movingState = 2;
+				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
+				this.fetchedIngredient.release();
+				this.fetchedIngredient = undefined;
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
 				this.dest = null;
 			}
@@ -235,30 +265,41 @@ function createRightArm(x, y, width, height) {
 	this.dest = null; // contains the dest of the upper right corner
 	this.movingState = 0; // 1 -> grab, 2 -> put down, 3 -> back to start pos
 
+	this.fetchedIngredient = undefined;
+
 	this.draw = function () {
 		ctx = gameCanvas.context;
 		ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
 	};
 
-	this.fetchIngredient = function (dest_) {
+	this.fetchIngredient = function (ingredient) {
+		this.dest = { x: ingredient.x + 100, y: ingredient.y };
 		this.movingState = 1;
-		this.dest = dest_;
+		this.fetchedIngredient = ingredient;
+	};
+
+	this.getSpeedVec = function () {
+		const dirVec = { x: this.dest.x - this.x, y: this.dest.y - this.y };
+		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
+		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+		return speedVec;
 	};
 
 	this.move = function () {
 		if (this.dest != null) {
-			const dirVec = { x: this.dest.x - this.x, y: this.dest.y - this.y };
-			const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
-			const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+			const speedVec = this.getSpeedVec();
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
 				this.dest = { x: gameCanvas.canvas.width / 2, y: this.startY };
 				this.movingState = 2;
+				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
+				this.fetchedIngredient.release();
+				this.fetchedIngredient = undefined;
 			} else if (this.movingState == 3 && this.x > this.dest.x) {
 				this.dest = null;
 			}
@@ -278,6 +319,9 @@ function getMousePos(canvas, evt) {
 gameCanvas.canvas.addEventListener(
 	"click",
 	function (evt) {
+		if (leftArm.fetchedIngredient != undefined) {
+			return;
+		}
 		var mousePos = getMousePos(gameCanvas.canvas, evt);
 		var clickedIngredient = null;
 		for (var i = 0; i < ingredients.length; i++) {
@@ -301,22 +345,16 @@ gameCanvas.canvas.addEventListener(
 			);
 			// Todo: make hand x movement non screen dependent
 			// calculate the offset
-			leftArm.fetchIngredient({
-				x: clickedIngredient.x + clickedIngredient.width + 100,
-				y: clickedIngredient.y,
-			});
+			leftArm.fetchIngredient(clickedIngredient);
 		}
 	},
 	false
 );
 
-window.addEventListener(
-	"beforeunload",
-	function () {
-		gameIsOver = true;
-		gameSocket.close();
-	}
-);
+window.addEventListener("beforeunload", function () {
+	gameIsOver = true;
+	gameSocket.close();
+});
 
 function createGameSocket(roomName, callback) {
 	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
@@ -344,7 +382,7 @@ function createGameSocket(roomName, callback) {
 				}
 			}
 			if (clickedIngredient != null) {
-				rightArm.fetchIngredient({ x: clickedIngredient.x + 100, y: clickedIngredient.y });
+				rightArm.fetchIngredient(clickedIngredient);
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
