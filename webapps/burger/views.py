@@ -128,6 +128,7 @@ async def disconnect(room_name):
   for uuid in room_name2uuids[room_name]:
     ws = uuid2websocket[uuid]
     await ws.close()
+  room_name2uuids[room_name] = []
 
 
 async def register_websocket(uuid, ws):
