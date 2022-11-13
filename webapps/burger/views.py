@@ -14,7 +14,7 @@ room_name2game = {}
 
 non_bun_ingredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese"]
 all_ingredients = non_bun_ingredients + ["bun"]
-recipe_size = 1
+recipe_size = 6
 
 
 class Game:
@@ -58,8 +58,9 @@ class Game:
       self.uuids = uuids
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
       self.recipe = ["bun"]
-      for _ in range(recipe_size):
-        self.recipe.append(non_bun_ingredients[randrange(len(non_bun_ingredients))])
+      for x in range(recipe_size):
+        self.recipe.append(non_bun_ingredients[x])
+        #self.recipe.append(non_bun_ingredients[randrange(len(non_bun_ingredients))])
       self.recipe.append("bun")
       self.current_progress = {uuids[0]: 0, uuids[1]: 0}
       await self.send_next_layer_to_player(uuids[0])

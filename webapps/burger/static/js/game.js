@@ -1,6 +1,7 @@
 var leftArm;
 var rightArm;
 var belt;
+var tv;
 var ingredients;
 var ingredientCounter;
 var gameSocket;
@@ -24,6 +25,7 @@ function init(uuid_, roomName_) {
 	ingredients = [];
 	gameIsStarted = false;
 	gameIsOver = false;
+	nextLayer = undefined;
 	leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
 	rightArm = new createRightArm(
 		gameCanvas.canvas.width - 150,
@@ -32,6 +34,7 @@ function init(uuid_, roomName_) {
 		120
 	);
 	belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
+	tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
 
 	belt.draw();
 	leftArm.draw();
@@ -75,6 +78,38 @@ var gameCanvas = {
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 	},
 };
+
+function createTV(x, y, width, height) {
+	this.width = width;
+	this.height = height;
+	this.x = x;
+	this.y = y;
+	
+	this.ingredientImg = undefined;
+
+	this.tvImg = new Image();
+	this.tvImg.src = "/static/tv.png";
+
+	this.setIngredient = function(name) {
+		this.ingredientImg = new Image();
+		this.ingredientImg.src = "/static/" + name + ".png";
+	};
+
+	this.removeIngredient = function () {
+		this.ingredientImg = undefined;
+	};
+
+	this.draw = function() {
+		ctx = gameCanvas.context;
+		ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
+		if(this.ingredientImg == undefined) {
+			// Todo: parasite screen
+		} else {
+			offset = 60
+			ctx.drawImage(this.ingredientImg, this.x + offset, this.y + offset, this.width - 2 * offset, this.height - 2 * offset);
+		}
+	};
+}
 
 function createIngredient(x, y, width, height, name) {
 	this.width = width;
@@ -281,6 +316,7 @@ function createGameSocket(roomName, callback) {
 			ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
+			tv.setIngredient(data["ingredient_name"]);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
 			clearInterval(updateCanvasInterval);
@@ -349,9 +385,11 @@ function updateCanvas() {
 	}
 
 	belt.draw();
+	tv.draw();
 	for (var i = 0; i < ingredients.length; i++) {
 		ingredients[i].draw();
 	}
 	leftArm.draw();
 	rightArm.draw();
+
 }
