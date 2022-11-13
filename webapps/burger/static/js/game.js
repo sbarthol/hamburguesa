@@ -101,10 +101,13 @@ function createTV(x, y, width, height) {
 
 	this.draw = function() {
 		ctx = gameCanvas.context;
-		ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
 		if(this.ingredientImg == undefined) {
+			ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
 			// Todo: parasite screen
 		} else {
+			ctx.fillStyle = "yellow";
+			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50 , this.height - 85);
+			ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
 			offset = 60
 			ctx.drawImage(this.ingredientImg, this.x + offset, this.y + offset, this.width - 2 * offset, this.height - 2 * offset);
 		}
