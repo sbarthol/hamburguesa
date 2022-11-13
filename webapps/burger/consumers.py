@@ -2,47 +2,37 @@
 # consumers.py
 import json
 
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
+from burger import views
 
 
-class GameConsumer(WebsocketConsumer):
-    def connect(self):
+class GameConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = "game_%s" % self.room_name
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
 
-        # Join room group
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name, self.channel_name
-        )
-
-        self.accept()
-
-    def disconnect(self, close_code):
+    async def disconnect(self, close_code):
         # Leave room group
-        async_to_sync(self.channel_layer.group_discard)(
-            self.room_group_name, self.channel_name
-        )
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     # Receive message from WebSocket
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        ingredientId = text_data_json["ingredientId"]
-        # print(f'user {self.channel_name} send {pos}')
-
+    async def receive(self, text_data):
         # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name, {"type": "game_message", "ingredientId": ingredientId, "from": self.channel_name}
-        )
+        data = json.loads(text_data)
+        data["type"] = "game_message"
+        data["from"] = self.channel_name
+        await self.channel_layer.group_send(self.room_group_name, data)
 
     # Receive message from room group
-    def game_message(self, event):
-        ingredientId = event["ingredientId"]
-        from_name = event["from"]
-        # print(f'socket {self.channel_name} receive {ingredientId} from {from_name}')
-
-
-        # Send message to WebSocket
-        if from_name != self.channel_name:
-            # print(f'send {ingredientId} to user {self.channel_name} ')
-            self.send(text_data=json.dumps({"ingredientId": ingredientId}))
+    async def game_message(self, data):
+        if data["from"] == self.channel_name:
+            print(f'game_message({data})')
+            message_type = data["message_type"]
+            if (message_type == "register"):
+                await views.register_websocket(data["uuid"], self)
+            elif (message_type == "pick_ingredient"):
+                await views.player_pick_ingredient(
+                    data["ingredient_id"], self.room_name, data["uuid"])
