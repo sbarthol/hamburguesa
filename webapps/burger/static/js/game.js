@@ -1,6 +1,7 @@
 var leftArm;
 var rightArm;
 var belt;
+var tv;
 var ingredients;
 var ingredientCounter;
 var gameSocket;
@@ -8,6 +9,8 @@ var uuid;
 var updateCanvasInterval;
 var gameIsStarted;
 var gameIsOver;
+
+// Todo: solve image loading problems
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
@@ -24,6 +27,7 @@ function init(uuid_, roomName_) {
 	ingredients = [];
 	gameIsStarted = false;
 	gameIsOver = false;
+	nextLayer = undefined;
 	leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
 	rightArm = new createRightArm(
 		gameCanvas.canvas.width - 150,
@@ -32,14 +36,16 @@ function init(uuid_, roomName_) {
 		120
 	);
 	belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
-
-	belt.draw();
-	leftArm.draw();
-	rightArm.draw();
+	tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
 
 	//https://www.1001fonts.com/mouse-memoirs-font.html
 	var f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
 	f.load().then(function (font) {
+		// Draw here to give some time to load the png
+		// Todo: is there a cleaner way
+		belt.draw();
+		leftArm.draw();
+		rightArm.draw();
 		// Add font on the html page
 		document.fonts.add(font);
 		drawText("Waiting for other player...");
@@ -76,15 +82,71 @@ var gameCanvas = {
 	},
 };
 
-function createIngredient(x, y, width, height, name) {
+function createTV(x, y, width, height) {
+
+	function createTVContent(name, parent) {
+
+		this.img = new Image();
+		this.img.src = "/static/" + name + ".png";
+
+		x_offset = 50;
+		y_offset = 20;
+		this.x = parent.x + x_offset;
+		this.width = parent.width - 2 * x_offset;
+		this.height = this.width * this.img.height / this.img.width;
+		this.y = parent.y + (parent.height - this.height) / 2 + y_offset;
+	
+		this.draw = function () {
+			ctx = gameCanvas.context;
+			ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+		};
+	}
+
 	this.width = width;
 	this.height = height;
 	this.x = x;
 	this.y = y;
+
+	this.content = undefined;
+
+	this.tvImg = new Image();
+	this.tvImg.src = "/static/tv.png";
+
+	this.scrambledImg = new Image();
+	this.scrambledImg.src = "/static/scrambled.png";
+
+	this.setIngredient = function (name) {
+		this.content = new createTVContent(name, this);
+	};
+
+	this.removeIngredient = function () {
+		this.content = undefined;
+	};
+
+	this.draw = function () {
+		ctx = gameCanvas.context;
+		if (this.content == undefined) {
+			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50, this.height - 85);
+		} else {
+			// Todo: add more pastel color variety
+			ctx.fillStyle = "yellow";
+			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50, this.height - 85);
+			this.content.draw();
+		}
+		ctx.drawImage(this.tvImg, this.x, this.y, this.width, this.height);
+	};
+}
+
+function createIngredient(x, bottom_y, width, name) {
+	this.width = width;
+	this.x = x;
 	this.name = name;
 
 	this.img = new Image();
 	this.img.src = "/static/" + name + ".png";
+
+	this.height = width * this.img.height / this.img.width;
+	this.y = bottom_y - this.height;
 
 	this.id = ingredientCounter++;
 
@@ -248,15 +310,23 @@ gameCanvas.canvas.addEventListener(
 	false
 );
 
+window.addEventListener(
+	"beforeunload",
+	function () {
+		gameIsOver = true;
+		gameSocket.close();
+	}
+);
+
 function createGameSocket(roomName, callback) {
 	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
 
 	gameSocket.onmessage = function (e) {
-		if(gameIsOver) {
+		if (gameIsOver) {
 			return;
 		}
 		const data = JSON.parse(e.data);
-		
+
 		if (data["message_type"] == undefined) {
 			console.error("message_type field is not set");
 			return;
@@ -278,9 +348,13 @@ function createGameSocket(roomName, callback) {
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
-			ingredients.push(new createIngredient(-100, belt.y - 100, 100, 100, name));
+			ingredients.push(new createIngredient(-100, belt.y, 100, name));
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
+			tv.removeIngredient();
+			setTimeout(() => {
+				tv.setIngredient(data["ingredient_name"]);
+			}, 1000);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
 			clearInterval(updateCanvasInterval);
@@ -305,7 +379,7 @@ function createGameSocket(roomName, callback) {
 	};
 	gameSocket.onclose = function (e) {
 		console.error("socket closed unexpectedly");
-		if(gameIsOver) {
+		if (gameIsOver) {
 			return;
 		}
 
@@ -349,6 +423,7 @@ function updateCanvas() {
 	}
 
 	belt.draw();
+	tv.draw();
 	for (var i = 0; i < ingredients.length; i++) {
 		ingredients[i].draw();
 	}
