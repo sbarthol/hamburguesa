@@ -85,9 +85,7 @@ var gameCanvas = {
 };
 
 function createTV(x, y, width, height) {
-
 	function createTVContent(name, parent) {
-
 		this.img = new Image();
 		this.img.src = "/static/" + name + ".png";
 
@@ -95,9 +93,9 @@ function createTV(x, y, width, height) {
 		y_offset = 20;
 		this.x = parent.x + x_offset;
 		this.width = parent.width - 2 * x_offset;
-		this.height = this.width * this.img.height / this.img.width;
+		this.height = (this.width * this.img.height) / this.img.width;
 		this.y = parent.y + (parent.height - this.height) / 2 + y_offset;
-	
+
 		this.draw = function () {
 			ctx = gameCanvas.context;
 			ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -147,23 +145,23 @@ function createIngredient(x, bottom_y, width, name) {
 	this.img = new Image();
 	this.img.src = "/static/" + name + ".png";
 
-	this.height = width * this.img.height / this.img.width;
+	this.height = (width * this.img.height) / this.img.width;
 	this.y = bottom_y - this.height;
 
 	this.id = ingredientCounter++;
 	this.grabbingArm = undefined;
 
-	this.grab = function(arm) {
+	this.grab = function (arm) {
 		this.grabbingArm = arm;
-	}
+	};
 
-	this.release = function() {
+	this.release = function () {
 		this.grabbingArm = undefined;
 		this.x = gameCanvas.canvas.width;
-	}
+	};
 
 	this.move = function () {
-		if(this.grabbingArm != undefined) {
+		if (this.grabbingArm != undefined) {
 			const speedVec = this.grabbingArm.getSpeedVec();
 			this.x += speedVec.x;
 			this.y += speedVec.y;
@@ -224,12 +222,12 @@ function createLeftArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
-	this.getSpeedVec = function() {
+	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
 		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
 		return speedVec;
-	}
+	};
 
 	this.move = function () {
 		if (this.dest != null) {
@@ -280,12 +278,12 @@ function createRightArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
-	this.getSpeedVec = function() {
+	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - this.x, y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
 		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
 		return speedVec;
-	}
+	};
 
 	this.move = function () {
 		if (this.dest != null) {
@@ -321,7 +319,7 @@ function getMousePos(canvas, evt) {
 gameCanvas.canvas.addEventListener(
 	"click",
 	function (evt) {
-		if(leftArm.fetchedIngredient != undefined) {
+		if (leftArm.fetchedIngredient != undefined) {
 			return;
 		}
 		var mousePos = getMousePos(gameCanvas.canvas, evt);
@@ -353,13 +351,10 @@ gameCanvas.canvas.addEventListener(
 	false
 );
 
-window.addEventListener(
-	"beforeunload",
-	function () {
-		gameIsOver = true;
-		gameSocket.close();
-	}
-);
+window.addEventListener("beforeunload", function () {
+	gameIsOver = true;
+	gameSocket.close();
+});
 
 function createGameSocket(roomName, callback) {
 	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
