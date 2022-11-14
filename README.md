@@ -14,6 +14,14 @@ docker run -p 6379:6379 -d redis:5
 python3 manage.py runserver
 ```
 
+## Project proposal - October 13 2022
+
+[Doc](https://docs.google.com/document/d/1PWi0D4n9Ewtf7P_U6JnpySDEJVUSHDuBC707slY0qi4/edit?usp=sharing)
+
+## Project specification - November 2 2022
+
+[Doc](https://docs.google.com/document/d/1MV4VEQqHGmwVlGkUqLYgXefBsELdKJruy_gkZG19qq8/edit?usp=sharing)
+
 ## Sprint presentation - November 3 2022
 
 The next sprint will focus on
@@ -24,8 +32,6 @@ The next sprint will focus on
 Owner: Tianqi Wu (tianqiw2)
 
 [Slides](https://docs.google.com/presentation/d/18yzldj4aZCfyOvOVwXs5LmhDw4C99zRL-DESmb1Dd4w/edit?usp=sharing)
-
-[Doc](https://docs.google.com/document/d/1MV4VEQqHGmwVlGkUqLYgXefBsELdKJruy_gkZG19qq8/edit?usp=sharing)
 
 ## Sprint presentation - November 15 2022
 
