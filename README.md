@@ -14,6 +14,18 @@ docker run -p 6379:6379 -d redis:5
 python3 manage.py runserver
 ```
 
+## Sprint presentation - November 3 2022
+
+The next sprint will focus on
+* Implement scoreboard (models, html mockup)
+* Updating & wiring the scoreboard 
+* Implement simple game mechanism (movement of hands reflecting on both sides for Websocket, ingredient workflow)
+
+Owner: Tianqi Wu (tianqiw2)
+
+[Slides](https://docs.google.com/presentation/d/18yzldj4aZCfyOvOVwXs5LmhDw4C99zRL-DESmb1Dd4w/edit?usp=sharing)
+[Doc](https://docs.google.com/document/d/1MV4VEQqHGmwVlGkUqLYgXefBsELdKJruy_gkZG19qq8/edit?usp=sharing)
+
 ## Sprint presentation - November 15 2022
 
 The next sprint will focus on
