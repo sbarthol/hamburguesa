@@ -9,6 +9,7 @@ var uuid;
 var updateCanvasInterval;
 var gameIsStarted;
 var gameIsOver;
+var loadedAssets;
 
 // Todo: solve image loading problems
 // Todo: can we download everything in advance
@@ -16,41 +17,82 @@ var gameIsOver;
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
-	gameSocket = createGameSocket(roomName_, () => {
-		gameSocket.send(
-			JSON.stringify({
-				message_type: "register",
-				uuid: uuid,
-			})
-		);
-	});
 	gameCanvas.init();
 
 	ingredients = [];
 	gameIsStarted = false;
 	gameIsOver = false;
 	nextLayer = undefined;
-	leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
-	rightArm = new createRightArm(
-		gameCanvas.canvas.width - 150,
-		gameCanvas.canvas.height - 150,
-		512,
-		120
-	);
-	belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
-	tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
+	loadedAssets = {};
+	loadAllAssets(() => {
+		leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
+		rightArm = new createRightArm(
+			gameCanvas.canvas.width - 150,
+			gameCanvas.canvas.height - 150,
+			512,
+			120
+		);
+		belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
+		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
 
-	//https://www.1001fonts.com/mouse-memoirs-font.html
-	var f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
-	f.load().then(function (font) {
-		// Draw here to give some time to load the png
-		// Todo: is there a cleaner way
 		belt.draw();
 		leftArm.draw();
 		rightArm.draw();
-		// Add font on the html page
-		document.fonts.add(font);
 		drawText("Waiting for other player...");
+
+		gameSocket = createGameSocket(roomName_, () => {
+			gameSocket.send(
+				JSON.stringify({
+					message_type: "register",
+					uuid: uuid,
+				})
+			);
+		});
+	});
+}
+
+function loadAllAssets(callback) {
+	const allFiles = [
+		"bun.png",
+		"cheese.png",
+		"ketchup.png",
+		"leftArm.png",
+		"lettuce.png",
+		"mayo.png",
+		"MouseMemoirs-Regular.ttf",
+		"onion.png",
+		"rightArm.png",
+		"scrambled.png",
+		"steak.png",
+		"tv.png",
+	];
+	allFiles.forEach((file) => {
+		const fullPath = "/static/" + file;
+		if (fullPath.endsWith(".png")) {
+			const img = new Image();
+			img.onload = function () {
+				loadedAssets[fullPath] = img;
+				console.log("downloaded " + fullPath);
+				if (Object.keys(loadedAssets).length == allFiles.length) {
+					callback();
+				}
+			};
+			img.src = fullPath;
+		} else if (fullPath == "/static/MouseMemoirs-Regular.ttf") {
+			//https://www.1001fonts.com/mouse-memoirs-font.html
+			const f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
+			f.load().then(function (font) {
+				// Add font on the html page
+				document.fonts.add(font);
+				loadedAssets[fullPath] = font;
+				console.log("downloaded " + fullPath);
+				if (Object.keys(loadedAssets).length == allFiles.length) {
+					callback();
+				}
+			});
+		} else {
+			console.error("could not download " + fullPath);
+		}
 	});
 }
 
@@ -86,8 +128,7 @@ var gameCanvas = {
 
 function createTV(x, y, width, height) {
 	function createTVContent(name, parent) {
-		this.img = new Image();
-		this.img.src = "/static/" + name + ".png";
+		this.img = loadedAssets["/static/" + name + ".png"];
 
 		x_offset = 50;
 		y_offset = 20;
@@ -109,11 +150,8 @@ function createTV(x, y, width, height) {
 
 	this.content = undefined;
 
-	this.tvImg = new Image();
-	this.tvImg.src = "/static/tv.png";
-
-	this.scrambledImg = new Image();
-	this.scrambledImg.src = "/static/scrambled.png";
+	this.tvImg = loadedAssets["/static/tv.png"];
+	this.scrambledImg = loadedAssets["/static/scrambled.png"];
 
 	this.setIngredient = function (name) {
 		this.content = new createTVContent(name, this);
@@ -142,8 +180,7 @@ function createIngredient(x, bottom_y, width, name) {
 	this.x = x;
 	this.name = name;
 
-	this.img = new Image();
-	this.img.src = "/static/" + name + ".png";
+	this.img = loadedAssets["/static/" + name + ".png"];
 
 	this.height = (width * this.img.height) / this.img.width;
 	this.y = bottom_y - this.height;
@@ -200,8 +237,7 @@ function createLeftArm(x, y, width, height) {
 	this.startX = x;
 	this.startY = y;
 
-	this.img = new Image();
-	this.img.src = "/static/leftArm.png";
+	this.img = loadedAssets["/static/leftArm.png"];
 
 	this.dest = null; // contains the dest of the upper right corner
 	this.movingState = 0; // 1 -> grab, 2 -> put down, 3 -> back to start pos
@@ -259,8 +295,7 @@ function createRightArm(x, y, width, height) {
 	this.startX = x;
 	this.startY = y;
 
-	this.img = new Image();
-	this.img.src = "/static/rightArm.png";
+	this.img = loadedAssets["/static/rightArm.png"];
 
 	this.dest = null; // contains the dest of the upper right corner
 	this.movingState = 0; // 1 -> grab, 2 -> put down, 3 -> back to start pos
