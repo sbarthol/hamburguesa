@@ -1,7 +1,10 @@
-@font-face { font-family: MouseMemoirs; src: url('/static/MouseMemoirs-Regular.ttf'); } 
+@font-face {
+    font-family: MouseMemoirs;
+    src: url('/static/MouseMemoirs-Regular.ttf');
+}
 
-body { 
-    font-family: MouseMemoirs, sans-serif; 
+body {
+    font-family: MouseMemoirs, sans-serif;
     font-size: 52px;
     color: white;
     background-color: #87ceeb;
@@ -12,9 +15,8 @@ body {
 input[type=text] {
     font-size: 52px;
     border: 2px solid black;
-    border-radius: 8px;
+    border-radius: 12px;
     -webkit-text-stroke-width: 0px;
-    -webkit-text-stroke-color: black;
 }
 
 input:focus[type=text] {
@@ -23,14 +25,19 @@ input:focus[type=text] {
 
 nav {
     font-size: 52px;
-    background-color: #048bc0;
+    background-color: #0d6efd;
     color: white;
     -webkit-text-stroke-width: 2px;
     -webkit-text-stroke-color: black;
+    border-bottom: 2px solid black;
 }
 
 .position-absolute {
     padding: 40px;
+}
+
+.header-image {
+    width: 100vw;
 }
 
 #room-name-submit {
@@ -42,11 +49,11 @@ nav {
     margin-top: 20px;
     margin-bottom: 20px;
     border: 2px solid black;
+    border-radius: 12px;
 }
 
 a {
     font-size: 52px;
-    background-color: #048bc0;
     color: white;
     padding: 10px;
     -webkit-text-stroke-width: 2px;
@@ -54,4 +61,6 @@ a {
     text-decoration: none;
 }
 
-
+a:hover {
+    color: white;
+}
