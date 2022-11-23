@@ -269,6 +269,12 @@ function createLeftArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
+	// Todo: make this slow to penalize fetching wrong ingredients
+	// or freeze the screen for some amount of time
+	// Todo: or remove last ingredient to punish player
+	// Todo: write the rules on the front page
+	// Todo: make ingredient id hard to guess (security measures)
+	// Todo: for bun, use different icon than layer
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
