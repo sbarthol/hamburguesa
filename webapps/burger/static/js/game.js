@@ -337,7 +337,7 @@ function createRightArm(x, y, width, height) {
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
-				this.dest = { x: gameCanvas.canvas.width / 2, y: this.startY };
+				this.dest = { x: gameCanvas.canvas.width + 100, y: this.startY };
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
@@ -345,7 +345,7 @@ function createRightArm(x, y, width, height) {
 				this.movingState = 3;
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
-			} else if (this.movingState == 3 && this.x > this.dest.x) {
+			} else if (this.movingState == 3 && this.x < this.dest.x) {
 				this.dest = null;
 			}
 		}
