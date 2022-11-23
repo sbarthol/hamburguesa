@@ -11,8 +11,6 @@ var gameIsStarted;
 var gameIsOver;
 var loadedAssets;
 
-// Todo: when game is over, let the player put the last ingredient before freezing
-
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
 	gameCanvas.init();
@@ -436,8 +434,6 @@ function createGameSocket(roomName, callback) {
 				}
 			}
 			if (clickedIngredient != null) {
-				// Todo: make hand x movement non screen dependent
-				// calculate the offset
 				leftArm.fetchIngredient(clickedIngredient);
 			}
 		} else if (data["message_type"] == "next_ingredient") {
@@ -506,10 +502,7 @@ function updateCanvas() {
 	leftArm.move();
 	rightArm.move();
 
-	// Todo: should i let the ingredients past the edge
-	// for the case where the mouse grabs an ingredient
-	// just before it disapears ?
-	while (ingredients.length > 0 && ingredients[0].x > gameCanvas.canvas.width) {
+	while (ingredients.length > 0 && ingredients[0].x > gameCanvas.canvas.width + 400) {
 		ingredients.shift();
 	}
 	for (var i = 0; i < ingredients.length; i++) {
