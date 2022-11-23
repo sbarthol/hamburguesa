@@ -7,6 +7,8 @@ from django.utils import timezone
 import asyncio
 from random import randrange
 
+# Todo: clear the data structres otherwise 
+# server will run out of memory
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
