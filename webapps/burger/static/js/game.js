@@ -376,9 +376,6 @@ gameCanvas.canvas.addEventListener(
 					uuid: uuid,
 				})
 			);
-			// Todo: make hand x movement non screen dependent
-			// calculate the offset
-			leftArm.fetchIngredient(clickedIngredient);
 		}
 	},
 	false
@@ -405,7 +402,7 @@ function createGameSocket(roomName, callback) {
 		if (data["message_type"] == "start_game") {
 			console.log("received data " + e.data);
 			startGame();
-		} else if (data["message_type"] == "pick_ingredient") {
+		} else if (data["message_type"] == "pick_ingredient_other") {
 			console.log("received data " + e.data);
 			const ingredientId = data["ingredient_id"];
 			var clickedIngredient = null;
@@ -416,6 +413,20 @@ function createGameSocket(roomName, callback) {
 			}
 			if (clickedIngredient != null) {
 				rightArm.fetchIngredient(clickedIngredient);
+			}
+		} else if (data["message_type"] == "pick_ingredient_you") {
+			console.log("received data " + e.data);
+			const ingredientId = data["ingredient_id"];
+			var clickedIngredient = null;
+			for (var i = 0; i < ingredients.length; i++) {
+				if (ingredients[i].id == ingredientId) {
+					clickedIngredient = ingredients[i];
+				}
+			}
+			if (clickedIngredient != null) {
+				// Todo: make hand x movement non screen dependent
+				// calculate the offset
+				leftArm.fetchIngredient(clickedIngredient);
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];

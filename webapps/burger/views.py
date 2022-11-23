@@ -82,6 +82,14 @@ class Game:
     async def pick_ingredient(self, uuid, ingredient_id):
       if (not self.ingredient_is_picked(ingredient_id)):
         self.picked_ingredients[uuid][ingredient_id] = True
+
+        ws = uuid2websocket[uuid]
+        await ws.send(text_data=json.dumps({"message_type": "pick_ingredient_you", "ingredient_id": ingredient_id}))
+
+        other_uuid = self.get_other_uuid(uuid)
+        other_ws = uuid2websocket[other_uuid]
+        await other_ws.send(text_data=json.dumps({"message_type": "pick_ingredient_other", "ingredient_id": ingredient_id}))
+
         if (self.recipe[self.current_progress[uuid]] == self.ingredient_id2ingredient[ingredient_id]):
           self.current_progress[uuid] = self.current_progress[uuid] + 1
           if (self.current_progress[uuid] == len(self.recipe)):
@@ -113,10 +121,6 @@ def room(request, room_name):
 async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
   await room_name2game[room_name].pick_ingredient(uuid, ingredient_id)
-  other_uuid = get_other_uuid(room_name, uuid)
-  ws = uuid2websocket[other_uuid]
-  await ws.send(text_data=json.dumps(
-      {"message_type": "pick_ingredient", "ingredient_id": ingredient_id}))
 
 
 def get_other_uuid(room_name, uuid):
