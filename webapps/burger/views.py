@@ -17,7 +17,7 @@ room_name2game = {}
 # Todo: add more
 # tomato, pickles, bacon, mustard, etc...
 non_bun_ingredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese"]
-all_ingredients = non_bun_ingredients + ["bun"]
+all_ingredients = non_bun_ingredients + ["top_bun", "bottom_bun"]
 recipe_size = 2
 next_ingredient_seconds = 0.7
 
@@ -61,10 +61,10 @@ class Game:
     async def start_game(self, uuids):
       self.uuids = uuids
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
-      self.recipe = ["bun"]
+      self.recipe = ["bottom_bun"]
       for x in range(recipe_size):
         self.recipe.append(non_bun_ingredients[randrange(len(non_bun_ingredients))])
-      self.recipe.append("bun")
+      self.recipe.append("top_bun")
       self.current_progress = {uuids[0]: 0, uuids[1]: 0}
       await self.send_next_layer_to_player(uuids[0])
       await self.send_next_layer_to_player(uuids[1])
