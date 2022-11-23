@@ -26,7 +26,6 @@ class Game:
     next_ingredient_id = 1
     uuids = []
     is_game_over = False
-    demo_counter = 0 # Todo: remove this, only for demo
 
     def get_other_uuid(self, uuid):
       if (self.uuids[0] == uuid):
@@ -37,9 +36,7 @@ class Game:
     async def send_next_ingredient_to_player(self):
       ingredient_id = self.next_ingredient_id
       self.next_ingredient_id = self.next_ingredient_id + 1
-      #ingredient_name = all_ingredients[randrange(len(all_ingredients))] # Todo: put back
-      ingredient_name = all_ingredients[self.demo_counter % len(all_ingredients)]
-      self.demo_counter = self.demo_counter + 1
+      ingredient_name = all_ingredients[randrange(len(all_ingredients))]
       self.ingredient_id2ingredient[ingredient_id] = ingredient_name
       for uuid in self.uuids:
         ws = uuid2websocket[uuid]
