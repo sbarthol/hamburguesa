@@ -258,6 +258,9 @@ function createLeftArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
+		if(this.fetchedIngredient != undefined) {
+			this.fetchedIngredient.release();
+		}
 		this.dest = {
 			x: ingredient.x + ingredient.width,
 			y: ingredient.y,
@@ -325,6 +328,9 @@ function createRightArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
+		if(this.fetchedIngredient != undefined) {
+			this.fetchedIngredient.release();
+		}
 		this.dest = { x: ingredient.x, y: ingredient.y };
 		this.movingState = 1;
 		this.fetchedIngredient = ingredient;
