@@ -57,6 +57,7 @@ class Game:
         await self.send_next_ingredient_to_player()
         await asyncio.sleep(next_ingredient_seconds)
 
+
     async def start_game(self, uuids):
       self.uuids = uuids
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
@@ -71,6 +72,7 @@ class Game:
       loop.create_task(self.send_next_ingredient_loop())
 
     async def game_over(self, winner_uuid):
+      await asyncio.sleep(2)
       winner_ws = uuid2websocket[winner_uuid]
       await winner_ws.send(text_data=json.dumps({"message_type": "game_over_win"}))
       loser_uuid = self.get_other_uuid(winner_uuid)
@@ -93,7 +95,8 @@ class Game:
         if (self.recipe[self.current_progress[uuid]] == self.ingredient_id2ingredient[ingredient_id]):
           self.current_progress[uuid] = self.current_progress[uuid] + 1
           if (self.current_progress[uuid] == len(self.recipe)):
-            await self.game_over(uuid)
+            loop = asyncio.get_event_loop()
+            loop.create_task(self.game_over(uuid))
           else:
             await self.send_next_layer_to_player(uuid)
 
