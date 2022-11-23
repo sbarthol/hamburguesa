@@ -14,6 +14,8 @@ uuid2websocket = {}
 uuid2room_name = {}
 room_name2game = {}
 
+# Todo: add more
+# tomato, pickles, bacon, mustard, etc...
 non_bun_ingredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese"]
 all_ingredients = non_bun_ingredients + ["bun"]
 recipe_size = 2
