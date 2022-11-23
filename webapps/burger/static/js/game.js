@@ -249,7 +249,7 @@ function createLeftArm(x, y, width, height) {
 
 	this.fetchIngredient = function (ingredient) {
 		this.dest = {
-			x: ingredient.x + ingredient.width + 100,
+			x: ingredient.x + ingredient.width,
 			y: ingredient.y,
 		};
 		this.movingState = 1;
@@ -259,12 +259,18 @@ function createLeftArm(x, y, width, height) {
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
-		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+		const speedVec = { x: (30 * dirVec.x) / norm, y: (30 * dirVec.y) / norm };
 		return speedVec;
 	};
 
 	this.move = function () {
 		if (this.dest != null) {
+			if(this.movingState == 1) {
+				this.dest = {
+					x: this.fetchedIngredient.x + this.fetchedIngredient.width,
+					y: this.fetchedIngredient.y,
+				};
+			}
 			const speedVec = this.getSpeedVec();
 			this.x += speedVec.x;
 			this.y += speedVec.y;
@@ -306,7 +312,7 @@ function createRightArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
-		this.dest = { x: ingredient.x + 100, y: ingredient.y };
+		this.dest = { x: ingredient.x, y: ingredient.y };
 		this.movingState = 1;
 		this.fetchedIngredient = ingredient;
 	};
@@ -314,12 +320,18 @@ function createRightArm(x, y, width, height) {
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - this.x, y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
-		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+		const speedVec = { x: (30 * dirVec.x) / norm, y: (30 * dirVec.y) / norm };
 		return speedVec;
 	};
 
 	this.move = function () {
 		if (this.dest != null) {
+			if(this.movingState == 1) {
+				this.dest = {
+					x: this.fetchedIngredient.x,
+					y: this.fetchedIngredient.y,
+				};
+			}
 			const speedVec = this.getSpeedVec();
 			this.x += speedVec.x;
 			this.y += speedVec.y;
