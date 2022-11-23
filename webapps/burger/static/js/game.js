@@ -21,12 +21,19 @@ function init(uuid_, roomName_) {
 	nextLayer = undefined;
 	loadedAssets = {};
 	loadAllAssets(() => {
-		leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
+		const armHeight = 120;
+		const armWidth = 3000;
+		leftArm = new createLeftArm(
+			-armWidth + 150,
+			gameCanvas.canvas.height - 150,
+			armWidth,
+			armHeight
+		);
 		rightArm = new createRightArm(
 			gameCanvas.canvas.width - 150,
 			gameCanvas.canvas.height - 150,
-			512,
-			120
+			armWidth,
+			armHeight
 		);
 		belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
 		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
@@ -263,7 +270,7 @@ function createLeftArm(x, y, width, height) {
 
 	this.move = function () {
 		if (this.dest != null) {
-			if(this.movingState == 1) {
+			if (this.movingState == 1) {
 				this.dest = {
 					x: this.fetchedIngredient.x + this.fetchedIngredient.width,
 					y: this.fetchedIngredient.y,
@@ -324,7 +331,7 @@ function createRightArm(x, y, width, height) {
 
 	this.move = function () {
 		if (this.dest != null) {
-			if(this.movingState == 1) {
+			if (this.movingState == 1) {
 				this.dest = {
 					x: this.fetchedIngredient.x,
 					y: this.fetchedIngredient.y,
