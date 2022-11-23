@@ -290,11 +290,14 @@ function createLeftArm(x, y, width, height) {
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
+				this.y = this.dest.y;
+
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
+				this.x = this.dest.x;
 				this.dest = null;
 			}
 		}
@@ -351,11 +354,14 @@ function createRightArm(x, y, width, height) {
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
+				this.y = this.dest.y;
+
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
+				this.x = this.dest.x;
 				this.dest = null;
 			}
 		}
