@@ -155,9 +155,15 @@ function createTV(x, y, width, height) {
 
 	this.tvImg = loadedAssets["/static/tv.png"];
 	this.scrambledImg = loadedAssets["/static/scrambled.png"];
+	
+	this.pastelColors = ["#FFCCF9", "#AFF8DB", "#D5AAFF", "#F3FFE3", "#B5B9FF", "#FFBEBC"];
+	this.currentPastelColor;
+	this.k = Math.floor(Math.random() * this.pastelColors.length);
 
 	this.setIngredient = function (name) {
 		this.content = new createTVContent(name, this);
+		this.currentPastelColor = this.pastelColors[this.k % this.pastelColors.length];
+		this.k = this.k + 1;
 	};
 
 	this.removeIngredient = function () {
@@ -169,8 +175,7 @@ function createTV(x, y, width, height) {
 		if (this.content == undefined) {
 			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 		} else {
-			// Todo: add more pastel color variety
-			ctx.fillStyle = "yellow";
+			ctx.fillStyle = this.currentPastelColor;
 			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 			this.content.draw();
 		}
