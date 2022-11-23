@@ -459,13 +459,15 @@ function createGameSocket(roomName, callback) {
 			}, 1000);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
-			clearInterval(updateCanvasInterval);
 
-			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-			ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+			setTimeout(() => {
+				clearInterval(updateCanvasInterval);
+				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+				ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+				drawText("You win!");
+				gameIsOver = true;
+			}, 800);
 
-			drawText("You win!");
-			gameIsOver = true;
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
 			clearInterval(updateCanvasInterval);
