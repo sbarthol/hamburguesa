@@ -341,7 +341,6 @@ function createLeftArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
-
 	// Todo: write the rules on the front page or different page
 	// Todo: make ingredient id hard to guess (security measures)
 	// Todo: for bun, use different icon than layer
@@ -476,7 +475,7 @@ gameCanvas.canvas.addEventListener(
 		if (leftArm.fetchedIngredient != undefined) {
 			return;
 		}
-		if(freeze) {
+		if (freeze) {
 			return;
 		}
 		var mousePos = getMousePos(gameCanvas.canvas, evt);
@@ -501,7 +500,7 @@ gameCanvas.canvas.addEventListener(
 				})
 			);
 
-			if(nextLayer != undefined && nextLayer != clickedIngredient.name) {
+			if (nextLayer != undefined && nextLayer != clickedIngredient.name) {
 				freeze = true;
 				setTimeout(() => {
 					freeze = false;
