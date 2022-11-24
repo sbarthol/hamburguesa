@@ -11,6 +11,7 @@ var updateCanvasInterval;
 var gameIsStarted;
 var gameIsOver;
 var loadedAssets;
+var youWon;
 
 
 // game scoreboard helper functions
@@ -26,6 +27,7 @@ function getCSRFToken() {
     return "unknown";
 }
 
+// Todo: server does that
 function addItem(username, score) {
 
     // Clear input box and old error message (if any)
@@ -38,11 +40,6 @@ function addItem(username, score) {
     });
 }
 
-
-
-// game logic functions
-// Todo: when game is over, let the player put the last ingredient before freezing
-
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
 	gameCanvas.init();
@@ -51,6 +48,7 @@ function init(uuid_, roomName_) {
 	gameIsStarted = false;
 	gameIsOver = false;
 	nextLayer = undefined;
+	youWon = undefined;
 	loadedAssets = {};
 	loadAllAssets(() => {
 		console.log(loadedAssets);
@@ -339,14 +337,11 @@ function createLeftArm(x, y, width, height) {
 
 	// Todo: make this slow to penalize fetching wrong ingredients
 	// or freeze the screen for some amount of time
-	// Todo: or remove last ingredient to punish player
-	// Todo: write the rules on the front page
+	// Todo: write the rules on the front page or different page
 	// Todo: make ingredient id hard to guess (security measures)
 	// Todo: for bun, use different icon than layer
 	// Todo: put hand on top of burger, not bottom
 	// Todo: custom offsets
-	// Todo: lose timelapse
-	// Todo: win after last layer is there
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
@@ -381,6 +376,10 @@ function createLeftArm(x, y, width, height) {
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
 				this.x = this.dest.x;
 				this.dest = null;
+
+				if(youWon) {
+					gameIsOver = true;
+				}
 			}
 		}
 	};
@@ -448,6 +447,10 @@ function createRightArm(x, y, width, height) {
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
 				this.x = this.dest.x;
 				this.dest = null;
+
+				if(youWon == false) {
+					gameIsOver = true;
+				}
 			}
 		}
 	};
@@ -550,30 +553,10 @@ function createGameSocket(roomName, callback) {
 			}, 1000);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
-
-			setTimeout(() => {
-				clearInterval(updateCanvasInterval);
-				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-				ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
-				drawText("You win!");
-				gameIsOver = true;
-			}, 800);
-
-			drawText("You win!");
-			gameIsOver = true;
-			console.log("You win!");
-			addItem("Alpha", 100000);
+			youWon = true;
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
-			clearInterval(updateCanvasInterval);
-
-			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-			ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
-
-			drawText("You lose!");
-			gameIsOver = true;
-			console.log("You lose!");
-			addItem("Beta", 1);
+			youWon = false;
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}
@@ -628,4 +611,18 @@ function updateCanvas() {
 	leftArm.draw();
 	rightArm.draw();
 	burger.draw();
+
+	if(gameIsOver) {
+		clearInterval(updateCanvasInterval);
+		ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+		if(youWon) {
+			drawText("You win!");
+			//addItem("Alpha", 100000);
+		} else {
+			drawText("You lose!");
+			//addItem("Beta", 1);
+		}
+		return;
+	}
 }
