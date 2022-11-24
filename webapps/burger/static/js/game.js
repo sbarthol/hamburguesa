@@ -12,6 +12,8 @@ var gameIsStarted;
 var gameIsOver;
 var loadedAssets;
 var youWon;
+var nextLayer;
+var freeze;
 
 // game scoreboard helper functions
 
@@ -47,6 +49,7 @@ function init(uuid_, roomName_) {
 	gameIsOver = false;
 	nextLayer = undefined;
 	youWon = undefined;
+	freeze = false;
 	loadedAssets = {};
 	loadAllAssets(() => {
 		console.log(loadedAssets);
@@ -474,6 +477,9 @@ gameCanvas.canvas.addEventListener(
 		if (leftArm.fetchedIngredient != undefined) {
 			return;
 		}
+		if(freeze) {
+			return;
+		}
 		var mousePos = getMousePos(gameCanvas.canvas, evt);
 		var clickedIngredient = null;
 		for (var i = 0; i < ingredients.length; i++) {
@@ -495,6 +501,13 @@ gameCanvas.canvas.addEventListener(
 					uuid: uuid,
 				})
 			);
+
+			if(nextLayer != undefined && nextLayer != clickedIngredient.name) {
+				freeze = true;
+				setTimeout(() => {
+					freeze = false;
+				}, 3000);
+			}
 		}
 	},
 	false
@@ -551,6 +564,7 @@ function createGameSocket(roomName, callback) {
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
 			tv.removeIngredient();
+			nextLayer = data["ingredient_name"];
 			setTimeout(() => {
 				tv.setIngredient(data["ingredient_name"]);
 			}, 1000);
@@ -614,6 +628,12 @@ function updateCanvas() {
 	leftArm.draw();
 	rightArm.draw();
 	burger.draw();
+
+	if (freeze) {
+		ctx.fillStyle = "rgba(255, 128, 0, 0.5)";
+		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+		drawText("Wrong ingredient!");
+	}
 
 	if (gameIsOver) {
 		clearInterval(updateCanvasInterval);
