@@ -4,7 +4,6 @@ var belt;
 var tv;
 var burger;
 var ingredients;
-var ingredientCounter;
 var gameSocket;
 var uuid;
 var updateCanvasInterval;
@@ -162,7 +161,6 @@ function drawText(text) {
 
 function startGame() {
 	ingredients = [];
-	ingredientCounter = 1;
 	gameIsStarted = true;
 	clearInterval(updateCanvasInterval);
 	updateCanvasInterval = setInterval(updateCanvas, 20);
@@ -256,7 +254,7 @@ function createTV(x, y, width, height) {
 	};
 }
 
-function createIngredient(x, bottom_y, width, name) {
+function createIngredient(x, bottom_y, width, name, id) {
 	this.width = width;
 	this.x = x;
 	this.name = name;
@@ -266,7 +264,7 @@ function createIngredient(x, bottom_y, width, name) {
 	this.height = (width * this.img.height) / this.img.width;
 	this.y = bottom_y - this.height;
 
-	this.id = ingredientCounter++;
+	this.id = id;
 	this.grabbingArm = undefined;
 
 	this.grab = function (arm) {
@@ -343,7 +341,6 @@ function createLeftArm(x, y, width, height) {
 	};
 
 	// Todo: write the rules on the front page or different page
-	// Todo: make ingredient id hard to guess (security measures)
 	// Todo: for bun, use different icon than layer
 	// Todo: put hand on top of burger, not bottom
 	// Todo: custom offsets
@@ -559,7 +556,7 @@ function createGameSocket(roomName, callback) {
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
-			ingredients.push(new createIngredient(-100, belt.y, 100, name));
+			ingredients.push(new createIngredient(-100, belt.y, 100, name, data["ingredient_id"]));
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
 			tv.removeIngredient();
@@ -585,13 +582,17 @@ function createGameSocket(roomName, callback) {
 
 		clearInterval(updateCanvasInterval);
 
-		if (!gameIsStarted) {
+		if (!gameIsStarted || freeze) {
 			ctx = gameCanvas.context;
 			ctx.clearRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 
 			belt.draw();
 			leftArm.draw();
 			rightArm.draw();
+			for (var i = 0; i < ingredients.length; i++) {
+				ingredients[i].draw();
+			}
+			tv.draw();
 		}
 
 		ctx.fillStyle = "rgba(255, 0, 0, 0.5)";

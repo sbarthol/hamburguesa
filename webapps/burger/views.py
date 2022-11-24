@@ -33,9 +33,11 @@ class Game:
     current_progress = {}  # current_progress[uuid] -> int
     ingredient_id2ingredient = {}
     recipe = []
-    next_ingredient_id = 1
     uuids = []
     is_game_over = False
+
+    def generate_ingredient_id(self):
+      return str(uuid.uuid4())
 
     def get_other_uuid(self, uuid):
       if (self.uuids[0] == uuid):
@@ -44,8 +46,7 @@ class Game:
         return self.uuids[0]
 
     async def send_next_ingredient_to_player(self):
-      ingredient_id = self.next_ingredient_id
-      self.next_ingredient_id = self.next_ingredient_id + 1
+      ingredient_id = self.generate_ingredient_id()
       ingredient_name = all_ingredients[randrange(len(all_ingredients))]
       self.ingredient_id2ingredient[ingredient_id] = ingredient_name
       for uuid in self.uuids:
