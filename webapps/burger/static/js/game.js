@@ -16,6 +16,7 @@ var nextLayer;
 var freeze;
 
 // game scoreboard helper functions
+// Todo: do we need this?
 
 function getCSRFToken() {
 	let cookies = document.cookie.split(";");
