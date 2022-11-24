@@ -7,6 +7,12 @@ from django.utils import timezone
 import asyncio
 from random import randrange
 
+
+from django.shortcuts import render, get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
+from django.core import serializers
+from django.http import HttpResponse, Http404, HttpResponseForbidden
+
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
@@ -162,27 +168,34 @@ async def register_websocket(uuid, ws):
 # instead of exposing a route to the clieint, the server
 # will simply update the DB at the end of the game
 
+# scoreboard logic
 
-def submit_score(request):
+def _my_json_error_response(message, status=200):
+    # You can create your JSON by constructing the string representation yourself (or just use json.dumps)
+    response_json = '{ "error": "' + message + '" }'
+    return HttpResponse(response_json, content_type='application/json', status=status)
+
+
+def add_score(request):
+  print("entered add-score function")
+  if request.method != 'POST':
+        return _my_json_error_response("You must use a POST request for this operation", status=405)
+  if not 'username' in request.POST or not request.POST['username']:
+        return _my_json_error_response("Abort: no username!", status=400)
+  if not 'score' in request.POST or not request.POST['score']:
+        return _my_json_error_response("Abort: no score!", status=400)
+  new_item = Score(username=request.POST['username'], ip_addr=request.META['REMOTE_ADDR'], score=request.POST['score'])
+  new_item.save()
+  return _my_json_error_response("Success!")
+  
+    
+
+def display_score(request):
     if request.method == 'GET':
         c = CreateForm()
-        context = {'form': c, 'items': Score.objects.all()}
+        context = {'form': c, 'items': sorted(Score.objects.all(), key = lambda entry:entry.score, reverse=True)}
         return render(request, 'scoreboard.html', context)
 
-    entry = Score(ip_addr=request.META['REMOTE_ADDR'])
-
-    entry.created_by = request.user
-    entry.creation_time = timezone.now()
-    entry.updated_by = request.user
-    entry.update_time = timezone.now()
-
-    create_form = CreateForm(request.POST, instance=entry)
-    if not create_form.is_valid():
-        context = {'form': create_form}
-        return render(request, 'scoreboard.html', context)
-
-    create_form.save()
-
-    context = {'form': CreateForm(), 'items': Score.objects.all()}
+    context = {'form': CreateForm(), 'items': sorted(Score.objects.all(), key = lambda entry:entry.score, reverse=True)}
     return render(request, 'scoreboard.html', context)
 

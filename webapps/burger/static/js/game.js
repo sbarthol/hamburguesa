@@ -11,6 +11,35 @@ var gameIsStarted;
 var gameIsOver;
 var loadedAssets;
 
+
+// game scoreboard helper functions
+
+function getCSRFToken() {
+    let cookies = document.cookie.split(";")
+    for (let i = 0; i < cookies.length; i++) {
+        let c = cookies[i].trim()
+        if (c.startsWith("csrftoken=")) {
+            return c.substring("csrftoken=".length, c.length)
+        }
+    }
+    return "unknown";
+}
+
+function addItem(username, score) {
+
+    // Clear input box and old error message (if any)
+
+    $.ajax({
+        url: "/add-score",
+        type: "POST",
+        data: "username="+username+"&score="+score+"&csrfmiddlewaretoken="+getCSRFToken(),
+        dataType : "json"
+    });
+}
+
+
+
+// game logic functions
 // Todo: when game is over, let the player put the last ingredient before freezing
 
 function init(uuid_, roomName_) {
@@ -435,6 +464,8 @@ function createGameSocket(roomName, callback) {
 
 			drawText("You win!");
 			gameIsOver = true;
+			console.log("You win!");
+			addItem("Alpha", 100000);
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
 			clearInterval(updateCanvasInterval);
@@ -444,6 +475,8 @@ function createGameSocket(roomName, callback) {
 
 			drawText("You lose!");
 			gameIsOver = true;
+			console.log("You lose!");
+			addItem("Beta", 1);
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}
