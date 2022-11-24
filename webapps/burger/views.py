@@ -202,3 +202,7 @@ def display_score(request):
     context = {'form': CreateForm(), 'items': sorted(Score.objects.all(), key = lambda entry:entry.score, reverse=True)}
     return render(request, 'scoreboard.html', context)
 
+
+def intro_page(request):
+  return render(request, 'intro.html', {})
+

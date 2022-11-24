@@ -21,4 +21,5 @@ urlpatterns = [
     path("scoreboard", views.display_score, name="scoreboard"),
     path("rooms/<str:room_name>/", views.room, name="room"),
     path('add-score', views.add_score),
+    path('intro', views.intro_page, name="intro"),
 ]
