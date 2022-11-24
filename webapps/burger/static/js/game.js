@@ -341,8 +341,7 @@ function createLeftArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
-	// Todo: make this slow to penalize fetching wrong ingredients
-	// or freeze the screen for some amount of time
+
 	// Todo: write the rules on the front page or different page
 	// Todo: make ingredient id hard to guess (security measures)
 	// Todo: for bun, use different icon than layer
