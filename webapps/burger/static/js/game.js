@@ -2,6 +2,7 @@ var leftArm;
 var rightArm;
 var belt;
 var tv;
+var burger;
 var ingredients;
 var ingredientCounter;
 var gameSocket;
@@ -52,6 +53,8 @@ function init(uuid_, roomName_) {
 	nextLayer = undefined;
 	loadedAssets = {};
 	loadAllAssets(() => {
+		console.log(loadedAssets);
+
 		const armHeight = 120;
 		const armWidth = 3000;
 		leftArm = new createLeftArm(
@@ -68,10 +71,12 @@ function init(uuid_, roomName_) {
 		);
 		belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
 		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
+		burger = new createBurger((gameCanvas.canvas.width - 256)/2, gameCanvas.canvas.height - 90, 256, 75);
 
 		belt.draw();
 		leftArm.draw();
 		rightArm.draw();
+		burger.draw();
 		drawText("Waiting for other player...");
 
 		gameSocket = createGameSocket(roomName_, () => {
@@ -87,7 +92,8 @@ function init(uuid_, roomName_) {
 
 function loadAllAssets(callback) {
 	const allFiles = [
-		"bun.png",
+		"bottom_bun.png",
+		"top_bun.png",
 		"cheese.png",
 		"ketchup.png",
 		"leftArm.png",
@@ -99,6 +105,14 @@ function loadAllAssets(callback) {
 		"scrambled.png",
 		"steak.png",
 		"tv.png",
+		"bottom_bun_layer.png",
+		"cheese_layer.png",
+		"ketchup_layer.png",
+		"lettuce_layer.png",
+		"mayo_layer.png",
+		"steak_layer.png",
+		"top_bun_layer.png",
+		"onion_layer.png"
 	];
 	allFiles.forEach((file) => {
 		const fullPath = "/static/" + file;
@@ -159,6 +173,29 @@ var gameCanvas = {
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 	},
 };
+
+function createBurger(x, y, width, height) {
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+
+	this.layers = []
+
+	this.addLayer = function (ingredientName) {
+		this.layers.push(ingredientName);
+	};
+
+	this.draw = function () {
+		var h = 0;
+		for(var i = 0; i < this.layers.length; i++) {
+			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
+			ctx = gameCanvas.context;
+			ctx.drawImage(img, this.x, this.y - h, this.width, this.height);
+			h = h +  this.height / 4;
+		}
+	}
+}
 
 function createTV(x, y, width, height) {
 	function createTVContent(name, parent) {
@@ -300,6 +337,16 @@ function createLeftArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
+	// Todo: make this slow to penalize fetching wrong ingredients
+	// or freeze the screen for some amount of time
+	// Todo: or remove last ingredient to punish player
+	// Todo: write the rules on the front page
+	// Todo: make ingredient id hard to guess (security measures)
+	// Todo: for bun, use different icon than layer
+	// Todo: put hand on top of burger, not bottom
+	// Todo: custom offsets
+	// Todo: lose timelapse
+	// Todo: win after last layer is there
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
@@ -328,6 +375,7 @@ function createLeftArm(x, y, width, height) {
 
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
+				burger.addLayer(this.fetchedIngredient.name);
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
@@ -579,4 +627,5 @@ function updateCanvas() {
 	}
 	leftArm.draw();
 	rightArm.draw();
+	burger.draw();
 }
