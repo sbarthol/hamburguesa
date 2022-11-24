@@ -314,6 +314,8 @@ function createLeftArm(x, y, width, height) {
 	// Todo: for bun, use different icon than layer
 	// Todo: put hand on top of burger, not bottom
 	// Todo: custom offsets
+	// Todo: lose timelapse
+	// Todo: win after last layer is there
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
