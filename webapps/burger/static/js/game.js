@@ -582,25 +582,24 @@ function createGameSocket(roomName, callback) {
 
 		clearInterval(updateCanvasInterval);
 
-		if (!gameIsStarted || freeze) {
-			ctx = gameCanvas.context;
-			ctx.clearRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+		ctx = gameCanvas.context;
+		ctx.clearRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 
-			belt.draw();
-			leftArm.draw();
-			rightArm.draw();
-			for (var i = 0; i < ingredients.length; i++) {
-				ingredients[i].draw();
-			}
-			tv.draw();
+		belt.draw();
+		tv.draw();
+		for (var i = 0; i < ingredients.length; i++) {
+			ingredients[i].draw();
 		}
+		leftArm.draw();
+		rightArm.draw();
+		burger.draw();
 
 		ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 
 		drawText("Oops, something went wrong...");
 	};
-	gameSocket.onopen = function (e) {
+	gameSocket.onopen = function (_) {
 		callback();
 	};
 	return gameSocket;
