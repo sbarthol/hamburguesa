@@ -13,6 +13,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core import serializers
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 
+# Todo: clear the data structres otherwise 
+# server will run out of memory
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
@@ -32,7 +34,6 @@ class Game:
     next_ingredient_id = 1
     uuids = []
     is_game_over = False
-    demo_counter = 0 # Todo: remove this, only for demo
 
     def get_other_uuid(self, uuid):
       if (self.uuids[0] == uuid):
@@ -43,9 +44,7 @@ class Game:
     async def send_next_ingredient_to_player(self):
       ingredient_id = self.next_ingredient_id
       self.next_ingredient_id = self.next_ingredient_id + 1
-      #ingredient_name = all_ingredients[randrange(len(all_ingredients))] # Todo: put back
-      ingredient_name = all_ingredients[self.demo_counter % len(all_ingredients)]
-      self.demo_counter = self.demo_counter + 1
+      ingredient_name = all_ingredients[randrange(len(all_ingredients))]
       self.ingredient_id2ingredient[ingredient_id] = ingredient_name
       for uuid in self.uuids:
         ws = uuid2websocket[uuid]
@@ -88,6 +87,14 @@ class Game:
     async def pick_ingredient(self, uuid, ingredient_id):
       if (not self.ingredient_is_picked(ingredient_id)):
         self.picked_ingredients[uuid][ingredient_id] = True
+
+        ws = uuid2websocket[uuid]
+        await ws.send(text_data=json.dumps({"message_type": "pick_ingredient_you", "ingredient_id": ingredient_id}))
+
+        other_uuid = self.get_other_uuid(uuid)
+        other_ws = uuid2websocket[other_uuid]
+        await other_ws.send(text_data=json.dumps({"message_type": "pick_ingredient_other", "ingredient_id": ingredient_id}))
+
         if (self.recipe[self.current_progress[uuid]] == self.ingredient_id2ingredient[ingredient_id]):
           self.current_progress[uuid] = self.current_progress[uuid] + 1
           if (self.current_progress[uuid] == len(self.recipe)):
@@ -119,10 +126,6 @@ def room(request, room_name):
 async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
   await room_name2game[room_name].pick_ingredient(uuid, ingredient_id)
-  other_uuid = get_other_uuid(room_name, uuid)
-  ws = uuid2websocket[other_uuid]
-  await ws.send(text_data=json.dumps(
-      {"message_type": "pick_ingredient", "ingredient_id": ingredient_id}))
 
 
 def get_other_uuid(room_name, uuid):

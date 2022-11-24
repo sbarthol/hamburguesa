@@ -52,12 +52,19 @@ function init(uuid_, roomName_) {
 	nextLayer = undefined;
 	loadedAssets = {};
 	loadAllAssets(() => {
-		leftArm = new createLeftArm(-350, gameCanvas.canvas.height - 150, 512, 120);
+		const armHeight = 120;
+		const armWidth = 3000;
+		leftArm = new createLeftArm(
+			-armWidth + 150,
+			gameCanvas.canvas.height - 150,
+			armWidth,
+			armHeight
+		);
 		rightArm = new createRightArm(
 			gameCanvas.canvas.width - 150,
 			gameCanvas.canvas.height - 150,
-			512,
-			120
+			armWidth,
+			armHeight
 		);
 		belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
 		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
@@ -179,9 +186,15 @@ function createTV(x, y, width, height) {
 
 	this.tvImg = loadedAssets["/static/tv.png"];
 	this.scrambledImg = loadedAssets["/static/scrambled.png"];
+	
+	this.pastelColors = ["#FFCCF9", "#AFF8DB", "#D5AAFF", "#F3FFE3", "#B5B9FF", "#FFBEBC"];
+	this.currentPastelColor;
+	this.k = Math.floor(Math.random() * this.pastelColors.length);
 
 	this.setIngredient = function (name) {
 		this.content = new createTVContent(name, this);
+		this.currentPastelColor = this.pastelColors[this.k % this.pastelColors.length];
+		this.k = this.k + 1;
 	};
 
 	this.removeIngredient = function () {
@@ -193,8 +206,7 @@ function createTV(x, y, width, height) {
 		if (this.content == undefined) {
 			ctx.drawImage(this.scrambledImg, this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 		} else {
-			// Todo: add more pastel color variety
-			ctx.fillStyle = "yellow";
+			ctx.fillStyle = this.currentPastelColor;
 			ctx.fillRect(this.x + 25, this.y + 65, this.width - 50, this.height - 85);
 			this.content.draw();
 		}
@@ -277,8 +289,11 @@ function createLeftArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
+		if(this.fetchedIngredient != undefined) {
+			this.fetchedIngredient.release();
+		}
 		this.dest = {
-			x: ingredient.x + ingredient.width + 100,
+			x: ingredient.x + ingredient.width,
 			y: ingredient.y,
 		};
 		this.movingState = 1;
@@ -288,12 +303,18 @@ function createLeftArm(x, y, width, height) {
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
-		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+		const speedVec = { x: (30 * dirVec.x) / norm, y: (30 * dirVec.y) / norm };
 		return speedVec;
 	};
 
 	this.move = function () {
 		if (this.dest != null) {
+			if (this.movingState == 1) {
+				this.dest = {
+					x: this.fetchedIngredient.x + this.fetchedIngredient.width,
+					y: this.fetchedIngredient.y,
+				};
+			}
 			const speedVec = this.getSpeedVec();
 			this.x += speedVec.x;
 			this.y += speedVec.y;
@@ -303,11 +324,14 @@ function createLeftArm(x, y, width, height) {
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
+				this.y = this.dest.y;
+
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
+				this.x = this.dest.x;
 				this.dest = null;
 			}
 		}
@@ -335,7 +359,10 @@ function createRightArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
-		this.dest = { x: ingredient.x + 100, y: ingredient.y };
+		if(this.fetchedIngredient != undefined) {
+			this.fetchedIngredient.release();
+		}
+		this.dest = { x: ingredient.x, y: ingredient.y };
 		this.movingState = 1;
 		this.fetchedIngredient = ingredient;
 	};
@@ -343,26 +370,35 @@ function createRightArm(x, y, width, height) {
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - this.x, y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
-		const speedVec = { x: (20 * dirVec.x) / norm, y: (20 * dirVec.y) / norm };
+		const speedVec = { x: (30 * dirVec.x) / norm, y: (30 * dirVec.y) / norm };
 		return speedVec;
 	};
 
 	this.move = function () {
 		if (this.dest != null) {
+			if (this.movingState == 1) {
+				this.dest = {
+					x: this.fetchedIngredient.x,
+					y: this.fetchedIngredient.y,
+				};
+			}
 			const speedVec = this.getSpeedVec();
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
-				this.dest = { x: gameCanvas.canvas.width / 2, y: this.startY };
+				this.dest = { x: gameCanvas.canvas.width + 100, y: this.startY };
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
+				this.y = this.dest.y;
+
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
-			} else if (this.movingState == 3 && this.x > this.dest.x) {
+			} else if (this.movingState == 3 && this.x < this.dest.x) {
+				this.x = this.dest.x;
 				this.dest = null;
 			}
 		}
@@ -405,9 +441,6 @@ gameCanvas.canvas.addEventListener(
 					uuid: uuid,
 				})
 			);
-			// Todo: make hand x movement non screen dependent
-			// calculate the offset
-			leftArm.fetchIngredient(clickedIngredient);
 		}
 	},
 	false
@@ -434,7 +467,7 @@ function createGameSocket(roomName, callback) {
 		if (data["message_type"] == "start_game") {
 			console.log("received data " + e.data);
 			startGame();
-		} else if (data["message_type"] == "pick_ingredient") {
+		} else if (data["message_type"] == "pick_ingredient_other") {
 			console.log("received data " + e.data);
 			const ingredientId = data["ingredient_id"];
 			var clickedIngredient = null;
@@ -445,6 +478,18 @@ function createGameSocket(roomName, callback) {
 			}
 			if (clickedIngredient != null) {
 				rightArm.fetchIngredient(clickedIngredient);
+			}
+		} else if (data["message_type"] == "pick_ingredient_you") {
+			console.log("received data " + e.data);
+			const ingredientId = data["ingredient_id"];
+			var clickedIngredient = null;
+			for (var i = 0; i < ingredients.length; i++) {
+				if (ingredients[i].id == ingredientId) {
+					clickedIngredient = ingredients[i];
+				}
+			}
+			if (clickedIngredient != null) {
+				leftArm.fetchIngredient(clickedIngredient);
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
@@ -457,10 +502,14 @@ function createGameSocket(roomName, callback) {
 			}, 1000);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
-			clearInterval(updateCanvasInterval);
 
-			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-			ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+			setTimeout(() => {
+				clearInterval(updateCanvasInterval);
+				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+				ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+				drawText("You win!");
+				gameIsOver = true;
+			}, 800);
 
 			drawText("You win!");
 			gameIsOver = true;
@@ -516,10 +565,7 @@ function updateCanvas() {
 	leftArm.move();
 	rightArm.move();
 
-	// Todo: should i let the ingredients past the edge
-	// for the case where the mouse grabs an ingredient
-	// just before it disapears ?
-	while (ingredients.length > 0 && ingredients[0].x > gameCanvas.canvas.width) {
+	while (ingredients.length > 0 && ingredients[0].x > gameCanvas.canvas.width + 400) {
 		ingredients.shift();
 	}
 	for (var i = 0; i < ingredients.length; i++) {
