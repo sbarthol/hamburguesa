@@ -341,7 +341,6 @@ function createLeftArm(x, y, width, height) {
 	};
 
 	// Todo: write the rules on the front page or different page
-	// Todo: for bun, use different icon than layer
 	// Todo: put hand on top of burger, not bottom
 	// Todo: custom offsets
 	this.getSpeedVec = function () {
