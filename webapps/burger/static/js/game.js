@@ -13,31 +13,29 @@ var gameIsOver;
 var loadedAssets;
 var youWon;
 
-
 // game scoreboard helper functions
 
 function getCSRFToken() {
-    let cookies = document.cookie.split(";")
-    for (let i = 0; i < cookies.length; i++) {
-        let c = cookies[i].trim()
-        if (c.startsWith("csrftoken=")) {
-            return c.substring("csrftoken=".length, c.length)
-        }
-    }
-    return "unknown";
+	let cookies = document.cookie.split(";");
+	for (let i = 0; i < cookies.length; i++) {
+		let c = cookies[i].trim();
+		if (c.startsWith("csrftoken=")) {
+			return c.substring("csrftoken=".length, c.length);
+		}
+	}
+	return "unknown";
 }
 
 // Todo: server does that
 function addItem(username, score) {
+	// Clear input box and old error message (if any)
 
-    // Clear input box and old error message (if any)
-
-    $.ajax({
-        url: "/add-score",
-        type: "POST",
-        data: "username="+username+"&score="+score+"&csrfmiddlewaretoken="+getCSRFToken(),
-        dataType : "json"
-    });
+	$.ajax({
+		url: "/add-score",
+		type: "POST",
+		data: "username=" + username + "&score=" + score + "&csrfmiddlewaretoken=" + getCSRFToken(),
+		dataType: "json",
+	});
 }
 
 function init(uuid_, roomName_) {
@@ -69,7 +67,12 @@ function init(uuid_, roomName_) {
 		);
 		belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
 		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
-		burger = new createBurger((gameCanvas.canvas.width - 256)/2, gameCanvas.canvas.height - 90, 256, 75);
+		burger = new createBurger(
+			(gameCanvas.canvas.width - 256) / 2,
+			gameCanvas.canvas.height - 90,
+			256,
+			75
+		);
 
 		belt.draw();
 		leftArm.draw();
@@ -110,7 +113,7 @@ function loadAllAssets(callback) {
 		"mayo_layer.png",
 		"steak_layer.png",
 		"top_bun_layer.png",
-		"onion_layer.png"
+		"onion_layer.png",
 	];
 	allFiles.forEach((file) => {
 		const fullPath = "/static/" + file;
@@ -178,7 +181,7 @@ function createBurger(x, y, width, height) {
 	this.width = width;
 	this.height = height;
 
-	this.layers = []
+	this.layers = [];
 
 	this.addLayer = function (ingredientName) {
 		this.layers.push(ingredientName);
@@ -186,13 +189,13 @@ function createBurger(x, y, width, height) {
 
 	this.draw = function () {
 		var h = 0;
-		for(var i = 0; i < this.layers.length; i++) {
+		for (var i = 0; i < this.layers.length; i++) {
 			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
 			ctx = gameCanvas.context;
 			ctx.drawImage(img, this.x, this.y - h, this.width, this.height);
-			h = h +  this.height / 4;
+			h = h + this.height / 4;
 		}
-	}
+	};
 }
 
 function createTV(x, y, width, height) {
@@ -221,7 +224,7 @@ function createTV(x, y, width, height) {
 
 	this.tvImg = loadedAssets["/static/tv.png"];
 	this.scrambledImg = loadedAssets["/static/scrambled.png"];
-	
+
 	this.pastelColors = ["#FFCCF9", "#AFF8DB", "#D5AAFF", "#F3FFE3", "#B5B9FF", "#FFBEBC"];
 	this.currentPastelColor;
 	this.k = Math.floor(Math.random() * this.pastelColors.length);
@@ -324,7 +327,7 @@ function createLeftArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
-		if(this.fetchedIngredient != undefined) {
+		if (this.fetchedIngredient != undefined) {
 			this.fetchedIngredient.release();
 		}
 		this.dest = {
@@ -377,7 +380,7 @@ function createLeftArm(x, y, width, height) {
 				this.x = this.dest.x;
 				this.dest = null;
 
-				if(youWon) {
+				if (youWon) {
 					gameIsOver = true;
 				}
 			}
@@ -406,7 +409,7 @@ function createRightArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
-		if(this.fetchedIngredient != undefined) {
+		if (this.fetchedIngredient != undefined) {
 			this.fetchedIngredient.release();
 		}
 		this.dest = { x: ingredient.x, y: ingredient.y };
@@ -448,7 +451,7 @@ function createRightArm(x, y, width, height) {
 				this.x = this.dest.x;
 				this.dest = null;
 
-				if(youWon == false) {
+				if (youWon == false) {
 					gameIsOver = true;
 				}
 			}
@@ -612,11 +615,11 @@ function updateCanvas() {
 	rightArm.draw();
 	burger.draw();
 
-	if(gameIsOver) {
+	if (gameIsOver) {
 		clearInterval(updateCanvasInterval);
 		ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
-		if(youWon) {
+		if (youWon) {
 			drawText("You win!");
 			//addItem("Alpha", 100000);
 		} else {
