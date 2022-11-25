@@ -295,7 +295,7 @@ function createIngredient(x, bottom_y, width, name, id) {
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 		} else {
-			this.x += 10.0;
+			this.x += 8.0;
 		}
 	};
 
