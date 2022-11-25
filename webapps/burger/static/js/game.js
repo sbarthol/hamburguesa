@@ -343,6 +343,7 @@ function createLeftArm(x, y, width, height) {
 	// Todo: write the rules on the front page or different page
 	// Todo: put hand on top of burger, not bottom
 	// Todo: custom offsets
+	// Todo: make belt speed faster
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
