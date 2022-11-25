@@ -72,9 +72,8 @@ function init(uuid_, roomName_) {
 		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
 		burger = new createBurger(
 			(gameCanvas.canvas.width - 256) / 2,
-			gameCanvas.canvas.height - 90,
-			256,
-			75
+			gameCanvas.canvas.height - 35,
+			256
 		);
 
 		belt.draw();
@@ -177,13 +176,24 @@ var gameCanvas = {
 	},
 };
 
-function createBurger(x, y, width, height) {
+function createBurger(x, y, width) {
 	this.x = x;
 	this.y = y;
 	this.width = width;
-	this.height = height;
+	this.height = 0;
 
-	const baselines = {"ketchup": 10, "mayo": 15};
+	const baselines = {
+		bottom_bun: 55,
+		top_bun: 60,
+		mayo: 20,
+		ketchup: 20,
+		lettuce: 40,
+		steak: 43,
+		cheese: 33,
+		onion: 40,
+	};
+	// dist between image top and baseline
+	const offset = 15;
 
 	this.layers = [];
 
@@ -192,12 +202,13 @@ function createBurger(x, y, width, height) {
 	};
 
 	this.draw = function () {
-		var h = 0;
+		var y = this.y;
 		for (var i = 0; i < this.layers.length; i++) {
 			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
 			ctx = gameCanvas.context;
-			ctx.drawImage(img, this.x, this.y - h, this.width, this.height);
-			h = h + this.height / 4;
+			console.log(baselines[this.layers[i]]);
+			ctx.drawImage(img, this.x, y - baselines[this.layers[i]], img.width, img.height);
+			y = y - baselines[this.layers[i]] + offset;
 		}
 	};
 }
@@ -346,6 +357,7 @@ function createLeftArm(x, y, width, height) {
 	// Todo: put hand on top of burger, not bottom
 	// Todo: custom offsets
 	// Todo: make belt speed faster
+	// Todo: draw better patty
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
