@@ -295,7 +295,7 @@ function createIngredient(x, bottom_y, width, name, id) {
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 		} else {
-			this.x += 5.0;
+			this.x += 10.0;
 		}
 	};
 
@@ -354,8 +354,7 @@ function createLeftArm(x, y, width, height) {
 	};
 
 	// Todo: write the rules on the front page or different page
-	// Todo: put hand on top of burger, not bottom
-	// Todo: custom offsets
+	// Todo: put hand on top of burger, not bottom (watch out if hand goes up)
 	// Todo: make belt speed faster
 	// Todo: draw better patty
 	this.getSpeedVec = function () {
