@@ -20,8 +20,10 @@ uuid2websocket = {}
 uuid2room_name = {}
 room_name2game = {}
 
+# Todo: add more
+# tomato, pickles, bacon, mustard, etc...
 non_bun_ingredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese"]
-all_ingredients = non_bun_ingredients + ["bun"]
+all_ingredients = non_bun_ingredients + ["top_bun", "bottom_bun"]
 recipe_size = 2
 next_ingredient_seconds = 0.7
 
@@ -31,9 +33,11 @@ class Game:
     current_progress = {}  # current_progress[uuid] -> int
     ingredient_id2ingredient = {}
     recipe = []
-    next_ingredient_id = 1
     uuids = []
     is_game_over = False
+
+    def generate_ingredient_id(self):
+      return str(uuid.uuid4())
 
     def get_other_uuid(self, uuid):
       if (self.uuids[0] == uuid):
@@ -42,8 +46,7 @@ class Game:
         return self.uuids[0]
 
     async def send_next_ingredient_to_player(self):
-      ingredient_id = self.next_ingredient_id
-      self.next_ingredient_id = self.next_ingredient_id + 1
+      ingredient_id = self.generate_ingredient_id()
       ingredient_name = all_ingredients[randrange(len(all_ingredients))]
       self.ingredient_id2ingredient[ingredient_id] = ingredient_name
       for uuid in self.uuids:
@@ -65,10 +68,10 @@ class Game:
     async def start_game(self, uuids):
       self.uuids = uuids
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
-      self.recipe = ["bun"]
+      self.recipe = ["bottom_bun"]
       for x in range(recipe_size):
         self.recipe.append(non_bun_ingredients[randrange(len(non_bun_ingredients))])
-      self.recipe.append("bun")
+      self.recipe.append("top_bun")
       self.current_progress = {uuids[0]: 0, uuids[1]: 0}
       await self.send_next_layer_to_player(uuids[0])
       await self.send_next_layer_to_player(uuids[1])

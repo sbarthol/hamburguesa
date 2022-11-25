@@ -2,45 +2,43 @@ var leftArm;
 var rightArm;
 var belt;
 var tv;
+var burger;
 var ingredients;
-var ingredientCounter;
 var gameSocket;
 var uuid;
 var updateCanvasInterval;
 var gameIsStarted;
 var gameIsOver;
 var loadedAssets;
-
+var youWon;
+var nextLayer;
+var freeze;
 
 // game scoreboard helper functions
+// Todo: do we need this?
 
 function getCSRFToken() {
-    let cookies = document.cookie.split(";")
-    for (let i = 0; i < cookies.length; i++) {
-        let c = cookies[i].trim()
-        if (c.startsWith("csrftoken=")) {
-            return c.substring("csrftoken=".length, c.length)
-        }
-    }
-    return "unknown";
+	let cookies = document.cookie.split(";");
+	for (let i = 0; i < cookies.length; i++) {
+		let c = cookies[i].trim();
+		if (c.startsWith("csrftoken=")) {
+			return c.substring("csrftoken=".length, c.length);
+		}
+	}
+	return "unknown";
 }
 
+// Todo: server does that
 function addItem(username, score) {
+	// Clear input box and old error message (if any)
 
-    // Clear input box and old error message (if any)
-
-    $.ajax({
-        url: "/add-score",
-        type: "POST",
-        data: "username="+username+"&score="+score+"&csrfmiddlewaretoken="+getCSRFToken(),
-        dataType : "json"
-    });
+	$.ajax({
+		url: "/add-score",
+		type: "POST",
+		data: "username=" + username + "&score=" + score + "&csrfmiddlewaretoken=" + getCSRFToken(),
+		dataType: "json",
+	});
 }
-
-
-
-// game logic functions
-// Todo: when game is over, let the player put the last ingredient before freezing
 
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
@@ -50,8 +48,12 @@ function init(uuid_, roomName_) {
 	gameIsStarted = false;
 	gameIsOver = false;
 	nextLayer = undefined;
+	youWon = undefined;
+	freeze = false;
 	loadedAssets = {};
 	loadAllAssets(() => {
+		console.log(loadedAssets);
+
 		const armHeight = 120;
 		const armWidth = 3000;
 		leftArm = new createLeftArm(
@@ -68,10 +70,17 @@ function init(uuid_, roomName_) {
 		);
 		belt = new createBelt(0, 130, gameCanvas.canvas.width, 25);
 		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
+		burger = new createBurger(
+			(gameCanvas.canvas.width - 256) / 2,
+			gameCanvas.canvas.height - 90,
+			256,
+			75
+		);
 
 		belt.draw();
 		leftArm.draw();
 		rightArm.draw();
+		burger.draw();
 		drawText("Waiting for other player...");
 
 		gameSocket = createGameSocket(roomName_, () => {
@@ -87,7 +96,8 @@ function init(uuid_, roomName_) {
 
 function loadAllAssets(callback) {
 	const allFiles = [
-		"bun.png",
+		"bottom_bun.png",
+		"top_bun.png",
 		"cheese.png",
 		"ketchup.png",
 		"leftArm.png",
@@ -99,6 +109,14 @@ function loadAllAssets(callback) {
 		"scrambled.png",
 		"steak.png",
 		"tv.png",
+		"bottom_bun_layer.png",
+		"cheese_layer.png",
+		"ketchup_layer.png",
+		"lettuce_layer.png",
+		"mayo_layer.png",
+		"steak_layer.png",
+		"top_bun_layer.png",
+		"onion_layer.png",
 	];
 	allFiles.forEach((file) => {
 		const fullPath = "/static/" + file;
@@ -143,7 +161,6 @@ function drawText(text) {
 
 function startGame() {
 	ingredients = [];
-	ingredientCounter = 1;
 	gameIsStarted = true;
 	clearInterval(updateCanvasInterval);
 	updateCanvasInterval = setInterval(updateCanvas, 20);
@@ -159,6 +176,29 @@ var gameCanvas = {
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 	},
 };
+
+function createBurger(x, y, width, height) {
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+
+	this.layers = [];
+
+	this.addLayer = function (ingredientName) {
+		this.layers.push(ingredientName);
+	};
+
+	this.draw = function () {
+		var h = 0;
+		for (var i = 0; i < this.layers.length; i++) {
+			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
+			ctx = gameCanvas.context;
+			ctx.drawImage(img, this.x, this.y - h, this.width, this.height);
+			h = h + this.height / 4;
+		}
+	};
+}
 
 function createTV(x, y, width, height) {
 	function createTVContent(name, parent) {
@@ -186,7 +226,7 @@ function createTV(x, y, width, height) {
 
 	this.tvImg = loadedAssets["/static/tv.png"];
 	this.scrambledImg = loadedAssets["/static/scrambled.png"];
-	
+
 	this.pastelColors = ["#FFCCF9", "#AFF8DB", "#D5AAFF", "#F3FFE3", "#B5B9FF", "#FFBEBC"];
 	this.currentPastelColor;
 	this.k = Math.floor(Math.random() * this.pastelColors.length);
@@ -214,7 +254,7 @@ function createTV(x, y, width, height) {
 	};
 }
 
-function createIngredient(x, bottom_y, width, name) {
+function createIngredient(x, bottom_y, width, name, id) {
 	this.width = width;
 	this.x = x;
 	this.name = name;
@@ -224,7 +264,7 @@ function createIngredient(x, bottom_y, width, name) {
 	this.height = (width * this.img.height) / this.img.width;
 	this.y = bottom_y - this.height;
 
-	this.id = ingredientCounter++;
+	this.id = id;
 	this.grabbingArm = undefined;
 
 	this.grab = function (arm) {
@@ -289,7 +329,7 @@ function createLeftArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
-		if(this.fetchedIngredient != undefined) {
+		if (this.fetchedIngredient != undefined) {
 			this.fetchedIngredient.release();
 		}
 		this.dest = {
@@ -300,6 +340,9 @@ function createLeftArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
+	// Todo: write the rules on the front page or different page
+	// Todo: put hand on top of burger, not bottom
+	// Todo: custom offsets
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
@@ -328,11 +371,16 @@ function createLeftArm(x, y, width, height) {
 
 				this.dest = { x: this.startX, y: this.startY };
 				this.movingState = 3;
+				burger.addLayer(this.fetchedIngredient.name);
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
 				this.x = this.dest.x;
 				this.dest = null;
+
+				if (youWon) {
+					gameIsOver = true;
+				}
 			}
 		}
 	};
@@ -359,7 +407,7 @@ function createRightArm(x, y, width, height) {
 	};
 
 	this.fetchIngredient = function (ingredient) {
-		if(this.fetchedIngredient != undefined) {
+		if (this.fetchedIngredient != undefined) {
 			this.fetchedIngredient.release();
 		}
 		this.dest = { x: ingredient.x, y: ingredient.y };
@@ -400,6 +448,10 @@ function createRightArm(x, y, width, height) {
 			} else if (this.movingState == 3 && this.x < this.dest.x) {
 				this.x = this.dest.x;
 				this.dest = null;
+
+				if (youWon == false) {
+					gameIsOver = true;
+				}
 			}
 		}
 	};
@@ -418,6 +470,9 @@ gameCanvas.canvas.addEventListener(
 	"click",
 	function (evt) {
 		if (leftArm.fetchedIngredient != undefined) {
+			return;
+		}
+		if (freeze) {
 			return;
 		}
 		var mousePos = getMousePos(gameCanvas.canvas, evt);
@@ -441,6 +496,13 @@ gameCanvas.canvas.addEventListener(
 					uuid: uuid,
 				})
 			);
+
+			if (nextLayer != undefined && nextLayer != clickedIngredient.name) {
+				freeze = true;
+				setTimeout(() => {
+					freeze = false;
+				}, 3000);
+			}
 		}
 	},
 	false
@@ -493,39 +555,20 @@ function createGameSocket(roomName, callback) {
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
-			ingredients.push(new createIngredient(-100, belt.y, 100, name));
+			ingredients.push(new createIngredient(-100, belt.y, 100, name, data["ingredient_id"]));
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
 			tv.removeIngredient();
+			nextLayer = data["ingredient_name"];
 			setTimeout(() => {
 				tv.setIngredient(data["ingredient_name"]);
 			}, 1000);
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
-
-			setTimeout(() => {
-				clearInterval(updateCanvasInterval);
-				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-				ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
-				drawText("You win!");
-				gameIsOver = true;
-			}, 800);
-
-			drawText("You win!");
-			gameIsOver = true;
-			console.log("You win!");
-			addItem("Alpha", 100000);
+			youWon = true;
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
-			clearInterval(updateCanvasInterval);
-
-			ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-			ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
-
-			drawText("You lose!");
-			gameIsOver = true;
-			console.log("You lose!");
-			addItem("Beta", 1);
+			youWon = false;
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}
@@ -538,21 +581,24 @@ function createGameSocket(roomName, callback) {
 
 		clearInterval(updateCanvasInterval);
 
-		if (!gameIsStarted) {
-			ctx = gameCanvas.context;
-			ctx.clearRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+		ctx = gameCanvas.context;
+		ctx.clearRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 
-			belt.draw();
-			leftArm.draw();
-			rightArm.draw();
+		belt.draw();
+		tv.draw();
+		for (var i = 0; i < ingredients.length; i++) {
+			ingredients[i].draw();
 		}
+		leftArm.draw();
+		rightArm.draw();
+		burger.draw();
 
 		ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 
 		drawText("Oops, something went wrong...");
 	};
-	gameSocket.onopen = function (e) {
+	gameSocket.onopen = function (_) {
 		callback();
 	};
 	return gameSocket;
@@ -579,4 +625,25 @@ function updateCanvas() {
 	}
 	leftArm.draw();
 	rightArm.draw();
+	burger.draw();
+
+	if (freeze) {
+		ctx.fillStyle = "rgba(255, 128, 0, 0.5)";
+		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+		drawText("Wrong ingredient!");
+	}
+
+	if (gameIsOver) {
+		clearInterval(updateCanvasInterval);
+		ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+		if (youWon) {
+			drawText("You win!");
+			//addItem("Alpha", 100000);
+		} else {
+			drawText("You lose!");
+			//addItem("Beta", 1);
+		}
+		return;
+	}
 }
