@@ -183,6 +183,8 @@ function createBurger(x, y, width, height) {
 	this.width = width;
 	this.height = height;
 
+	const baselines = {"ketchup": 10, "mayo": 15};
+
 	this.layers = [];
 
 	this.addLayer = function (ingredientName) {
