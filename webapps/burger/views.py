@@ -13,19 +13,17 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core import serializers
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 
-# Todo: clear the data structres otherwise 
-# server will run out of memory
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
 room_name2game = {}
 
-# Todo: add more
-# tomato, pickles, bacon, mustard, etc...
-non_bun_ingredients = ["mayo", "lettuce", "ketchup", "steak", "onion", "cheese"]
+non_bun_ingredients = ["mayo", "lettuce",
+                       "ketchup", "steak", "onion", "cheese"]
 all_ingredients = non_bun_ingredients + ["top_bun", "bottom_bun"]
 recipe_size = 9
 next_ingredient_seconds = 0.4
+
 
 class Game:
     # picked_ingredients[uuid][ingredient_id] -> boolean
@@ -70,7 +68,8 @@ class Game:
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
       self.recipe = ["bottom_bun"]
       for x in range(recipe_size):
-        self.recipe.append(non_bun_ingredients[randrange(len(non_bun_ingredients))])
+        self.recipe.append(
+            non_bun_ingredients[randrange(len(non_bun_ingredients))])
       self.recipe.append("top_bun")
       self.current_progress = {uuids[0]: 0, uuids[1]: 0}
       await self.send_next_layer_to_player(uuids[0])
@@ -138,6 +137,7 @@ def get_other_uuid(room_name, uuid):
   else:
     return room_name2uuids[room_name][0]
 
+
 async def disconnect(room_name):
   for uuid in room_name2uuids[room_name]:
     ws = uuid2websocket[uuid]
@@ -168,13 +168,8 @@ async def register_websocket(uuid, ws):
     room_name2uuids[room_name] = [uuid]
     room_name2game[room_name] = Game()
 
-# TODO: add security measures.
-# yes, the server will maintain the game logic
-# and will know which player won
-# instead of exposing a route to the clieint, the server
-# will simply update the DB at the end of the game
-
 # scoreboard logic
+
 
 def _my_json_error_response(message, status=200):
     # You can create your JSON by constructing the string representation yourself (or just use json.dumps)
@@ -185,27 +180,28 @@ def _my_json_error_response(message, status=200):
 def add_score(request):
   print("entered add-score function")
   if request.method != 'POST':
-        return _my_json_error_response("You must use a POST request for this operation", status=405)
+      return _my_json_error_response("You must use a POST request for this operation", status=405)
   if not 'username' in request.POST or not request.POST['username']:
-        return _my_json_error_response("Abort: no username!", status=400)
+      return _my_json_error_response("Abort: no username!", status=400)
   if not 'score' in request.POST or not request.POST['score']:
-        return _my_json_error_response("Abort: no score!", status=400)
-  new_item = Score(username=request.POST['username'], ip_addr=request.META['REMOTE_ADDR'], score=request.POST['score'])
+      return _my_json_error_response("Abort: no score!", status=400)
+  new_item = Score(username=request.POST['username'],
+                   ip_addr=request.META['REMOTE_ADDR'], score=request.POST['score'])
   new_item.save()
   return _my_json_error_response("Success!")
-  
-    
+
 
 def display_score(request):
     if request.method == 'GET':
         c = CreateForm()
-        context = {'form': c, 'items': sorted(Score.objects.all(), key = lambda entry:entry.score, reverse=True)}
+        context = {'form': c, 'items': sorted(
+            Score.objects.all(), key=lambda entry: entry.score, reverse=True)}
         return render(request, 'scoreboard.html', context)
 
-    context = {'form': CreateForm(), 'items': sorted(Score.objects.all(), key = lambda entry:entry.score, reverse=True)}
+    context = {'form': CreateForm(), 'items': sorted(
+        Score.objects.all(), key=lambda entry: entry.score, reverse=True)}
     return render(request, 'scoreboard.html', context)
 
 
 def intro_page(request):
   return render(request, 'intro.html', {})
-

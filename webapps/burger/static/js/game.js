@@ -15,8 +15,6 @@ var nextLayer;
 var freeze;
 
 // game scoreboard helper functions
-// Todo: do we need this?
-
 function getCSRFToken() {
 	let cookies = document.cookie.split(";");
 	for (let i = 0; i < cookies.length; i++) {
@@ -28,7 +26,6 @@ function getCSRFToken() {
 	return "unknown";
 }
 
-// Todo: server does that
 function addItem(username, score) {
 	// Clear input box and old error message (if any)
 
@@ -353,10 +350,6 @@ function createLeftArm(x, y, width, height) {
 		this.fetchedIngredient = ingredient;
 	};
 
-	// Todo: write the rules on the front page or different page
-	// Todo: put hand on top of burger, not bottom (watch out if hand goes up)
-	// Todo: make belt speed faster
-	// Todo: draw better patty
 	this.getSpeedVec = function () {
 		const dirVec = { x: this.dest.x - (this.x + this.width), y: this.dest.y - this.y };
 		const norm = Math.sqrt(dirVec.x * dirVec.x + dirVec.y * dirVec.y);
