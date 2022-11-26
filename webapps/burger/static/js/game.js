@@ -593,11 +593,11 @@ function createGameSocket(roomName, callback) {
 
 		belt.draw();
 		tv.draw();
+		leftArm.draw();
+		rightArm.draw();
 		for (var i = 0; i < ingredients.length; i++) {
 			ingredients[i].draw();
 		}
-		leftArm.draw();
-		rightArm.draw();
 		burger.draw();
 
 		ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
@@ -627,11 +627,11 @@ function updateCanvas() {
 
 	belt.draw();
 	tv.draw();
+	leftArm.draw();
+	rightArm.draw();
 	for (var i = 0; i < ingredients.length; i++) {
 		ingredients[i].draw();
 	}
-	leftArm.draw();
-	rightArm.draw();
 	burger.draw();
 
 	if (freeze) {
