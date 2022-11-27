@@ -113,6 +113,14 @@ function loadAllAssets(callback) {
 		"steak_layer.png",
 		"top_bun_layer.png",
 		"onion_layer.png",
+		"tomato.png",
+		"tomato_layer.png",
+		"bacon.png",
+		"bacon_layer.png",
+		"pickle.png",
+		"pickle_layer.png",
+		"mustard.png",
+		"mustard_layer.png"
 	];
 	allFiles.forEach((file) => {
 		const fullPath = "/static/" + file;
@@ -186,8 +194,12 @@ function createBurger(x, y, width) {
 		ketchup: 20,
 		lettuce: 40,
 		steak: 43,
-		cheese: 33,
+		cheese: 25,
 		onion: 40,
+		bacon: 39,
+		mustard: 20,
+		pickle: 30,
+		tomato: 45
 	};
 	// dist between image top and baseline
 	const offset = 15;
