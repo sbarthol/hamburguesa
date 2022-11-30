@@ -67,7 +67,7 @@ function init(uuid_, roomName_) {
 		tv = new createTV(gameCanvas.canvas.width - 220, 170, 200, 200);
 		burger = new createBurger(
 			(gameCanvas.canvas.width - 256) / 2,
-			gameCanvas.canvas.height - 35,
+			gameCanvas.canvas.height - 60,
 			256
 		);
 
@@ -103,6 +103,7 @@ function loadAllAssets(callback) {
 		"scrambled.png",
 		"steak.png",
 		"tv.png",
+		"plate.png",
 		"bottom_bun_layer.png",
 		"cheese_layer.png",
 		"ketchup_layer.png",
@@ -221,10 +222,12 @@ function createBurger(x, y, width) {
 	};
 
 	this.draw = function () {
+		ctx = gameCanvas.context;
+		const plate_img = loadedAssets["/static/plate.png"];
+		ctx.drawImage(plate_img, (gameCanvas.canvas.width - plate_img.width) / 2, this.y - 80, plate_img.width, plate_img.height);
 		var y = this.y;
 		for (var i = 0; i < this.layers.length; i++) {
 			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
-			ctx = gameCanvas.context;
 			ctx.drawImage(img, this.x, y - bottom_lines[this.layers[i]], img.width, img.height);
 			y = y - bottom_lines[this.layers[i]] + top_lines[this.layers[i]];
 		}
