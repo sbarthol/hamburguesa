@@ -49,8 +49,6 @@ function init(uuid_, roomName_) {
 	freeze = false;
 	loadedAssets = {};
 	loadAllAssets(() => {
-		console.log(loadedAssets);
-
 		const armHeight = 120;
 		const armWidth = 3000;
 		leftArm = new createLeftArm(
@@ -227,7 +225,6 @@ function createBurger(x, y, width) {
 		for (var i = 0; i < this.layers.length; i++) {
 			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
 			ctx = gameCanvas.context;
-			console.log(bottom_lines[this.layers[i]]);
 			ctx.drawImage(img, this.x, y - bottom_lines[this.layers[i]], img.width, img.height);
 			y = y - bottom_lines[this.layers[i]] + top_lines[this.layers[i]];
 		}
