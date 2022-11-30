@@ -187,22 +187,34 @@ function createBurger(x, y, width) {
 	this.width = width;
 	this.height = 0;
 
-	const baselines = {
+	const bottom_lines = {
 		bottom_bun: 55,
 		top_bun: 60,
-		mayo: 20,
-		ketchup: 20,
-		lettuce: 40,
-		steak: 43,
+		mayo: 27,
+		ketchup: 27,
+		lettuce: 43,
+		steak: 45,
 		cheese: 25,
 		onion: 40,
-		bacon: 39,
-		mustard: 20,
-		pickle: 30,
+		bacon: 47,
+		mustard: 27,
+		pickle: 35,
 		tomato: 45
 	};
-	// dist between image top and baseline
-	const offset = 15;
+	const top_lines = {
+		bottom_bun: 30,
+		top_bun: 34,
+		mayo: 12,
+		ketchup: 12,
+		lettuce: 25,
+		steak: 15,
+		cheese: 14,
+		onion: 22,
+		bacon: 22,
+		mustard: 12,
+		pickle: 13,
+		tomato: 20
+	};
 
 	this.layers = [];
 
@@ -215,9 +227,9 @@ function createBurger(x, y, width) {
 		for (var i = 0; i < this.layers.length; i++) {
 			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
 			ctx = gameCanvas.context;
-			console.log(baselines[this.layers[i]]);
-			ctx.drawImage(img, this.x, y - baselines[this.layers[i]], img.width, img.height);
-			y = y - baselines[this.layers[i]] + offset;
+			console.log(bottom_lines[this.layers[i]]);
+			ctx.drawImage(img, this.x, y - bottom_lines[this.layers[i]], img.width, img.height);
+			y = y - bottom_lines[this.layers[i]] + top_lines[this.layers[i]];
 		}
 	};
 }

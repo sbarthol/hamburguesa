@@ -18,9 +18,9 @@ uuid2websocket = {}
 uuid2room_name = {}
 room_name2game = {}
 
-non_bun_ingredients = ["mayo", "lettuce",
-                       "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato"]
-all_ingredients = non_bun_ingredients + ["top_bun", "bottom_bun"]
+non_top_bun_ingredients = ["mayo", "lettuce",
+                       "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato", "bottom_bun"]
+all_ingredients = non_top_bun_ingredients + ["top_bun"]
 recipe_size = 9
 next_ingredient_seconds = 0.4
 
@@ -68,10 +68,10 @@ class Game:
     async def start_game(self, uuids):
       self.uuids = uuids
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
-      self.recipe = ["bottom_bun"]
-      for x in range(recipe_size):
+      self.recipe = ["bottom_bun", "steak"]
+      for _ in range(recipe_size):
         self.recipe.append(
-            non_bun_ingredients[randrange(len(non_bun_ingredients))])
+            non_top_bun_ingredients[randrange(len(non_top_bun_ingredients))])
       self.recipe.append("top_bun")
       self.current_progress = {uuids[0]: 0, uuids[1]: 0}
       await self.send_next_layer_to_player(uuids[0])
