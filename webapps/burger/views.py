@@ -46,6 +46,8 @@ class Game:
     async def send_next_ingredient_to_player(self):
       ingredient_id = self.generate_ingredient_id()
       ingredient_name = all_ingredients[randrange(len(all_ingredients))]
+      if (randrange(4) == 0):
+        ingredient_name = self.recipe[self.current_progress[self.uuids[randrange(2)]]]
       self.ingredient_id2ingredient[ingredient_id] = ingredient_name
       for uuid in self.uuids:
         ws = uuid2websocket[uuid]
