@@ -1,17 +1,14 @@
 from django.shortcuts import render
 import uuid
 import json
-from burger.forms import CreateForm
 from burger.models import Score
-from django.utils import timezone
 import asyncio
 from random import randrange
+import datetime
+import time
 
-
-from django.shortcuts import render, get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
-from django.core import serializers
-from django.http import HttpResponse, Http404, HttpResponseForbidden
+from django.shortcuts import render
+from asgiref.sync import sync_to_async
 
 room_name2uuids = {}
 uuid2websocket = {}
@@ -21,7 +18,7 @@ room_name2game = {}
 non_top_bun_ingredients = ["mayo", "lettuce",
                            "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato", "bottom_bun"]
 all_ingredients = non_top_bun_ingredients + ["top_bun"]
-recipe_size = 12
+recipe_size = 1
 next_ingredient_seconds = 0.4
 
 
@@ -32,7 +29,10 @@ class Game:
     ingredient_id2ingredient = {}
     recipe = []
     uuids = []
+    names = {}
     is_game_over = False
+    start_time = {}
+    start_time_timezone = {}
 
     def generate_ingredient_id(self):
       return str(uuid.uuid4())
@@ -69,7 +69,10 @@ class Game:
         await asyncio.sleep(next_ingredient_seconds)
 
     async def start_game(self, uuids):
+      self.start_time_timezone = datetime.datetime.now()
+      self.start_time = round(time.time() * 1000)
       self.uuids = uuids
+      self.names = {uuids[0]: "player_0", uuids[1]: "player_1"} # Todo
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
       self.recipe = ["bottom_bun", "steak"]
       for _ in range(recipe_size):
@@ -82,6 +85,16 @@ class Game:
       loop = asyncio.get_event_loop()
       loop.create_task(self.send_next_ingredient_loop())
 
+    async def save_to_db(self, winner_uuid, loser_uuid):
+      end_time = round(time.time() * 1000)
+      new_item = Score(winner_name=self.names[winner_uuid],
+                   loser_name=self.names[loser_uuid],
+                   room_name=uuid2room_name[winner_uuid],
+                   duration_millis=end_time - self.start_time,
+                   start_time=self.start_time_timezone)
+      await sync_to_async(new_item.save)()
+      
+
     async def game_over(self, winner_uuid):
       winner_ws = uuid2websocket[winner_uuid]
       await winner_ws.send(text_data=json.dumps({"message_type": "game_over_win"}))
@@ -89,7 +102,7 @@ class Game:
       loser_ws = uuid2websocket[loser_uuid]
       await loser_ws.send(text_data=json.dumps({"message_type": "game_over_lose"}))
       self.is_game_over = True
-      # Todo: write score to database
+      await self.save_to_db(winner_uuid, loser_uuid)
 
     async def pick_ingredient(self, uuid, ingredient_id):
       if (not self.ingredient_is_picked(ingredient_id)):
@@ -174,39 +187,10 @@ async def register_websocket(uuid, ws):
     room_name2uuids[room_name] = [uuid]
     room_name2game[room_name] = Game()
 
-# scoreboard logic
-
-
-def _my_json_error_response(message, status=200):
-    # You can create your JSON by constructing the string representation yourself (or just use json.dumps)
-    response_json = '{ "error": "' + message + '" }'
-    return HttpResponse(response_json, content_type='application/json', status=status)
-
-
-def add_score(request):
-  print("entered add-score function")
-  if request.method != 'POST':
-      return _my_json_error_response("You must use a POST request for this operation", status=405)
-  if not 'username' in request.POST or not request.POST['username']:
-      return _my_json_error_response("Abort: no username!", status=400)
-  if not 'score' in request.POST or not request.POST['score']:
-      return _my_json_error_response("Abort: no score!", status=400)
-  new_item = Score(username=request.POST['username'],
-                   ip_addr=request.META['REMOTE_ADDR'], score=request.POST['score'])
-  new_item.save()
-  return _my_json_error_response("Success!")
-
-
 def scoreboard(request):
-    if request.method == 'GET':
-        c = CreateForm()
-        context = {'form': c, 'items': sorted(
-            Score.objects.all(), key=lambda entry: entry.score, reverse=True)}
-        return render(request, 'scoreboard.html', context)
-
-    context = {'form': CreateForm(), 'items': sorted(
-        Score.objects.all(), key=lambda entry: entry.score, reverse=True)}
-    return render(request, 'scoreboard.html', context)
+  context = {'items': sorted(
+      Score.objects.all(), key=lambda entry: entry.duration_millis, reverse=True)}
+  return render(request, 'scoreboard.html', context)
 
 
 def rules(request):

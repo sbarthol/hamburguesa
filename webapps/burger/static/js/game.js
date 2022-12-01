@@ -14,29 +14,6 @@ var youWon;
 var nextLayer;
 var freeze;
 
-// game scoreboard helper functions
-function getCSRFToken() {
-	let cookies = document.cookie.split(";");
-	for (let i = 0; i < cookies.length; i++) {
-		let c = cookies[i].trim();
-		if (c.startsWith("csrftoken=")) {
-			return c.substring("csrftoken=".length, c.length);
-		}
-	}
-	return "unknown";
-}
-
-function addItem(username, score) {
-	// Clear input box and old error message (if any)
-
-	$.ajax({
-		url: "/add-score",
-		type: "POST",
-		data: "username=" + username + "&score=" + score + "&csrfmiddlewaretoken=" + getCSRFToken(),
-		dataType: "json",
-	});
-}
-
 function init(uuid_, roomName_) {
 	this.uuid = uuid_;
 	gameCanvas.init();
@@ -777,10 +754,8 @@ function updateCanvas() {
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 		if (youWon) {
 			drawText("You win!");
-			//addItem("Alpha", 100000);
 		} else {
 			drawText("You lose!");
-			//addItem("Beta", 1);
 		}
 		return;
 	}

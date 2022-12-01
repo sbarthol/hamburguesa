@@ -7,7 +7,6 @@
   {% load static %}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
   <link href="{% static 'css/scoreboard.css' %}" rel="stylesheet">
-  <link href="{% static 'css/game.css' %}" rel="stylesheet">
 
   
 </head>
@@ -36,13 +35,19 @@
     
 <table class="table score-table">
   <tr>
-    <th>Username</th>
+    <th>Winner</th>
+    <th>Loser</th>
     <th>Score</th>
+    <th>Room</th>
+    <th>Date</th>
   </tr>
   {% for item in items %}
       <tr>
-          <td>{{item.username}}</td>
-          <td>{{item.score}}</td>
+          <td>{{item.winner_name}}</td>
+          <td>{{item.loser_name}}</td>
+          <td>{{item.duration_millis}}</td>
+          <td>{{item.room_name}}</td>
+          <td>{{item.start_time}}</td>
       </tr>
   {% endfor %}
 </table>

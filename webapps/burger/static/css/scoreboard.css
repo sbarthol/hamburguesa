@@ -13,41 +13,10 @@ body {
     font-size: 40px;
     color: white;
     background-color: #87ceeb;
-    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-width: 1.4px;
     -webkit-text-stroke-color: black;
 }
 
-input[type=text] {
-    font-size: 40px;
-    border: 2px solid black;
-    border-radius: 12px;
-    -webkit-text-stroke-width: 0px;
-}
-
-input:focus[type=text] {
-    outline: none;
-}
-
-.position-absolute {
-    padding: 40px;
-    padding-top: 10px;
-}
-
-.header-image {
-    width: 100vw;
-}
-
-#room-name-submit {
-    font-size: 40px;
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 30px;
-    margin-bottom: 30px;
-    border: 1.40px solid black;
-    border-radius: 12px;
-}
 
 a {
     font-size: 52px;
@@ -62,10 +31,11 @@ a:hover {
     color: white;
 }
 
-th, td {
+th, td, tr {
     font-size: 40px;
     color: white;
     padding: 10px;
+    font-weight: normal;
     -webkit-text-stroke-width: 1.40px;
     -webkit-text-stroke-color: black;
     text-decoration: none;
