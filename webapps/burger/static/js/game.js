@@ -119,7 +119,12 @@ function loadAllAssets(callback) {
 		"pickle.png",
 		"pickle_layer.png",
 		"mustard.png",
-		"mustard_layer.png"
+		"mustard_layer.png",
+		"sparkles_0.png",
+		"sparkles_1.png",
+		"sparkles_2.png",
+		"sparkles_3.png",
+		"spatula.png"
 	];
 	allFiles.forEach((file) => {
 		const fullPath = "/static/" + file;
@@ -292,6 +297,7 @@ function createIngredient(x, bottom_y, width, name, id) {
 	this.width = width;
 	this.x = x;
 	this.name = name;
+	this.isSpatula = false;
 
 	this.img = loadedAssets["/static/" + name + ".png"];
 
@@ -323,6 +329,75 @@ function createIngredient(x, bottom_y, width, name, id) {
 	this.draw = function () {
 		ctx = gameCanvas.context;
 		ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+	};
+}
+
+function createBelt(x, y, width, height) {
+	this.width = width;
+	this.height = height;
+	this.x = x;
+	this.y = y;
+
+	this.draw = function () {
+		ctx = gameCanvas.context;
+		ctx.fillStyle = "black";
+		ctx.fillRect(this.x, this.y, this.width, this.height);
+		ctx.fillStyle = "gray";
+		border = 2;
+		ctx.fillRect(this.x, this.y + border, this.width, this.height - 2 * border);
+	};
+}
+
+function createSpatula(x, bottom_y, width, id) {
+	this.width = width;
+	this.x = x;
+	this.name = undefined;
+	this.isSpatula = true;
+
+	this.img = loadedAssets["/static/spatula.png"];
+	this.height = (width * this.img.height) / this.img.width;
+	this.y = bottom_y - this.height;
+
+	this.id = id;
+	this.grabbingArm = undefined;
+
+	this.sparkles = [];
+	for(var i=0;i<4;i++) {
+		this.sparkles.push(loadedAssets["/static/sparkles_" + i + ".png"]);
+	}
+	this.spakles_drawing_index = 0;
+	this.spakles_drawing_counter = 0;
+	const sparkles_drawing_period = 10;
+
+	this.grab = function (arm) {
+		this.grabbingArm = arm;
+	};
+
+	this.release = function () {
+		this.grabbingArm = undefined;
+		this.x = gameCanvas.canvas.width;
+	};
+
+	this.move = function () {
+		if (this.grabbingArm != undefined) {
+			const speedVec = this.grabbingArm.getSpeedVec();
+			this.x += speedVec.x;
+			this.y += speedVec.y;
+		} else {
+			this.x += 8.0;
+		}
+	};
+
+	this.draw = function () {
+		ctx = gameCanvas.context;
+		ctx.drawImage(this.sparkles[this.spakles_drawing_index], this.x, this.y, this.width, this.height);
+		ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+
+		this.spakles_drawing_counter++;
+		if(this.spakles_drawing_counter >= sparkles_drawing_period) {
+			this.spakles_drawing_index = (this.spakles_drawing_index + 1) % this.sparkles.length;
+			this.spakles_drawing_counter = 0;
+		}
 	};
 }
 
@@ -528,7 +603,9 @@ gameCanvas.canvas.addEventListener(
 				})
 			);
 
-			if (nextLayer != undefined && nextLayer != clickedIngredient.name) {
+			if(nextLayer != undefined && clickedIngredient.isSpatula) {
+				clickedIngredient.name = nextLayer;
+			} else if (nextLayer != undefined && nextLayer != clickedIngredient.name) {
 				freeze = true;
 				setTimeout(() => {
 					freeze = false;
@@ -586,7 +663,11 @@ function createGameSocket(roomName, callback) {
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
-			ingredients.push(new createIngredient(-100, belt.y, 100, name, data["ingredient_id"]));
+			if(name == "spatula") {
+				ingredients.push(new createSpatula(-100, belt.y, 100, data["ingredient_id"]));
+			} else {
+				ingredients.push(new createIngredient(-100, belt.y, 100, name, data["ingredient_id"]));
+			}
 		} else if (data["message_type"] == "next_layer") {
 			console.log("received data " + e.data);
 			tv.removeIngredient();
