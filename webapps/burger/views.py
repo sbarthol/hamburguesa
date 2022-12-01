@@ -21,7 +21,7 @@ room_name2game = {}
 non_top_bun_ingredients = ["mayo", "lettuce",
                            "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato", "bottom_bun"]
 all_ingredients = non_top_bun_ingredients + ["top_bun"]
-recipe_size = 9
+recipe_size = 12
 next_ingredient_seconds = 0.4
 
 
