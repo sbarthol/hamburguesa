@@ -197,7 +197,7 @@ def add_score(request):
   return _my_json_error_response("Success!")
 
 
-def display_score(request):
+def scoreboard(request):
     if request.method == 'GET':
         c = CreateForm()
         context = {'form': c, 'items': sorted(
@@ -209,5 +209,5 @@ def display_score(request):
     return render(request, 'scoreboard.html', context)
 
 
-def intro_page(request):
-  return render(request, 'intro.html', {})
+def rules(request):
+  return render(request, 'rules.html', {})
