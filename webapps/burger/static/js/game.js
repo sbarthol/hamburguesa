@@ -188,6 +188,7 @@ var gameCanvas = {
 function createBurger(x, y, width) {
 	this.x = x;
 	this.y = y;
+	this.top = y - 50;
 	this.width = width;
 	this.height = 0;
 
@@ -224,6 +225,7 @@ function createBurger(x, y, width) {
 
 	this.addLayer = function (ingredientName) {
 		this.layers.push(ingredientName);
+		this.top -= bottom_lines[ingredientName] - top_lines[ingredientName];
 	};
 
 	this.draw = function () {
@@ -465,23 +467,35 @@ function createLeftArm(x, y, width, height) {
 				};
 			}
 			const speedVec = this.getSpeedVec();
+			if(this.movingState == 3) {
+				console.log("speedvec");
+				console.log(speedVec);
+				console.log("startY");
+				console.log(this.startY);
+				console.log("dest");
+				console.log(this.dest);
+				console.log("y");
+				console.log(this.y);
+			}
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
-				this.dest = { x: gameCanvas.canvas.width / 2, y: this.startY };
+				console.log(burger.top)
+				this.dest = { x: gameCanvas.canvas.width / 2, y: Math.max(this.y + 1, burger.top) };
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
 			} else if (this.movingState == 2 && this.y > this.dest.y) {
 				this.y = this.dest.y;
 
-				this.dest = { x: this.startX, y: this.startY };
+				this.dest = { x: this.startX + this.width, y: this.startY };
 				this.movingState = 3;
 				burger.addLayer(this.fetchedIngredient.name);
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
-			} else if (this.movingState == 3 && this.x < this.dest.x) {
-				this.x = this.dest.x;
+			} else if (this.movingState == 3 && this.x + this.width < this.dest.x) {
+				this.x = this.dest.x - this.width;
+				this.y = this.dest.y;
 				this.dest = null;
 
 				if (youWon) {
