@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>burger game</title>
+  <title>Scoreboard</title>
   {% load static %}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
   <link href="{% static 'css/scoreboard.css' %}" rel="stylesheet">
@@ -21,13 +21,13 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a aria-current="page" href="{% url 'index' %}">Game Page</a>
+            <a aria-current="page" href="{% url 'index' %}">Home</a>
           </li>
           <li class="nav-item">
             <a  aria-current="page" href="{% url 'scoreboard' %}">Scoreboard</a>
           </li>
           <li class="nav-item">
-            <a  aria-current="page" href="{% url 'intro' %}">How to Play</a>
+            <a  aria-current="page" href="{% url 'intro' %}">Rules</a>
           </li>
         </ul>
       </div>
