@@ -124,7 +124,7 @@ function loadAllAssets(callback) {
 		"sparkles_1.png",
 		"sparkles_2.png",
 		"sparkles_3.png",
-		"spatula.png"
+		"spatula.png",
 	];
 	allFiles.forEach((file) => {
 		const fullPath = "/static/" + file;
@@ -204,7 +204,7 @@ function createBurger(x, y, width) {
 		bacon: 47,
 		mustard: 27,
 		pickle: 35,
-		tomato: 45
+		tomato: 45,
 	};
 	const top_lines = {
 		bottom_bun: 30,
@@ -218,7 +218,7 @@ function createBurger(x, y, width) {
 		bacon: 22,
 		mustard: 12,
 		pickle: 13,
-		tomato: 20
+		tomato: 20,
 	};
 
 	this.layers = [];
@@ -231,7 +231,13 @@ function createBurger(x, y, width) {
 	this.draw = function () {
 		ctx = gameCanvas.context;
 		const plate_img = loadedAssets["/static/plate.png"];
-		ctx.drawImage(plate_img, (gameCanvas.canvas.width - plate_img.width) / 2, this.y - 80, plate_img.width, plate_img.height);
+		ctx.drawImage(
+			plate_img,
+			(gameCanvas.canvas.width - plate_img.width) / 2,
+			this.y - 80,
+			plate_img.width,
+			plate_img.height
+		);
 		var y = this.y;
 		for (var i = 0; i < this.layers.length; i++) {
 			const img = loadedAssets["/static/" + this.layers[i] + "_layer.png"];
@@ -364,7 +370,7 @@ function createSpatula(x, bottom_y, width, id) {
 	this.grabbingArm = undefined;
 
 	this.sparkles = [];
-	for(var i=0;i<4;i++) {
+	for (var i = 0; i < 4; i++) {
 		this.sparkles.push(loadedAssets["/static/sparkles_" + i + ".png"]);
 	}
 	this.spakles_drawing_index = 0;
@@ -392,11 +398,17 @@ function createSpatula(x, bottom_y, width, id) {
 
 	this.draw = function () {
 		ctx = gameCanvas.context;
-		ctx.drawImage(this.sparkles[this.spakles_drawing_index], this.x, this.y, this.width, this.height);
+		ctx.drawImage(
+			this.sparkles[this.spakles_drawing_index],
+			this.x,
+			this.y,
+			this.width,
+			this.height
+		);
 		ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
 
 		this.spakles_drawing_counter++;
-		if(this.spakles_drawing_counter >= sparkles_drawing_period) {
+		if (this.spakles_drawing_counter >= sparkles_drawing_period) {
 			this.spakles_drawing_index = (this.spakles_drawing_index + 1) % this.sparkles.length;
 			this.spakles_drawing_counter = 0;
 		}
@@ -467,7 +479,7 @@ function createLeftArm(x, y, width, height) {
 				};
 			}
 			const speedVec = this.getSpeedVec();
-			if(this.movingState == 3) {
+			if (this.movingState == 3) {
 				console.log("speedvec");
 				console.log(speedVec);
 				console.log("startY");
@@ -481,7 +493,7 @@ function createLeftArm(x, y, width, height) {
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
-				console.log(burger.top)
+				console.log(burger.top);
 				this.dest = { x: gameCanvas.canvas.width / 2, y: Math.max(this.y + 1, burger.top) };
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
@@ -617,7 +629,7 @@ gameCanvas.canvas.addEventListener(
 				})
 			);
 
-			if(nextLayer != undefined && clickedIngredient.isSpatula) {
+			if (nextLayer != undefined && clickedIngredient.isSpatula) {
 				clickedIngredient.name = nextLayer;
 			} else if (nextLayer != undefined && nextLayer != clickedIngredient.name) {
 				freeze = true;
@@ -677,7 +689,7 @@ function createGameSocket(roomName, callback) {
 			}
 		} else if (data["message_type"] == "next_ingredient") {
 			const name = data["ingredient_name"];
-			if(name == "spatula") {
+			if (name == "spatula") {
 				ingredients.push(new createSpatula(-100, belt.y, 100, data["ingredient_id"]));
 			} else {
 				ingredients.push(new createIngredient(-100, belt.y, 100, name, data["ingredient_id"]));

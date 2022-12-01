@@ -19,7 +19,7 @@ uuid2room_name = {}
 room_name2game = {}
 
 non_top_bun_ingredients = ["mayo", "lettuce",
-                       "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato", "bottom_bun"]
+                           "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato", "bottom_bun"]
 all_ingredients = non_top_bun_ingredients + ["top_bun"]
 recipe_size = 9
 next_ingredient_seconds = 0.4
@@ -49,7 +49,8 @@ class Game:
       if (randrange(25) == 0):
         ingredient_name = "spatula"
       elif (randrange(4) == 0):
-        ingredient_name = self.recipe[self.current_progress[self.uuids[randrange(2)]]]
+        ingredient_name = self.recipe[self.current_progress[self.uuids[randrange(
+            2)]]]
       self.ingredient_id2ingredient[ingredient_id] = ingredient_name
       for uuid in self.uuids:
         ws = uuid2websocket[uuid]
