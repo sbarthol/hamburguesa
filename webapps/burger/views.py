@@ -15,7 +15,7 @@ from asgiref.sync import sync_to_async
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
-uuid2user_name = {}
+uuid2username = {}
 room_name2game = {}
 
 non_top_bun_ingredients = ["mayo", "lettuce",
@@ -88,8 +88,8 @@ class Game:
 
     async def save_to_db(self, winner_uuid, loser_uuid):
       end_time = round(time.time() * 1000)
-      new_item = Score(winner_name=uuid2user_name[winner_uuid],
-                       loser_name=uuid2user_name[loser_uuid],
+      new_item = Score(winner_name=uuid2username[winner_uuid],
+                       loser_name=uuid2username[loser_uuid],
                        room_name=uuid2room_name[winner_uuid],
                        duration_millis=end_time - self.start_time,
                        start_time=self.start_time_timezone)
@@ -131,7 +131,7 @@ def index(request):
   if request.method == 'POST':
     form = GameForm(request.POST)
     if form.is_valid():
-      user_name = form.cleaned_data.get("name")
+      username = form.cleaned_data.get("username")
       room_name = form.cleaned_data.get("room")
 
       new_uuid = str(uuid.uuid4())
@@ -140,9 +140,9 @@ def index(request):
       print(f'room_name2uuids = {room_name2uuids}')
       print(f'uuid2room_name = {uuid2room_name}')
 
-      return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "user_name": user_name})
+      return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "username": username})
     else:
-      return render(request, "index.html", {"form": GameForm()})  
+      return render(request, "index.html", {"form": form})  
   else:
     return render(request, "index.html", {"form": GameForm()})  
   
@@ -170,10 +170,10 @@ async def disconnect(room_name):
   room_name2uuids[room_name] = []
 
 
-async def register_websocket(uuid, user_name, ws):
+async def register_websocket(uuid, username, ws):
   print(f'register_websocket({uuid})')
   uuid2websocket[uuid] = ws
-  uuid2user_name[uuid] = user_name
+  uuid2username[uuid] = username
   room_name = uuid2room_name[uuid]
   if (room_name in room_name2uuids and len(room_name2uuids[room_name]) == 2):
     for old_uuid in room_name2uuids[room_name]:

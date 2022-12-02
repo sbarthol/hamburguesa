@@ -67,3 +67,23 @@ a {
 a:hover {
     color: white;
 }
+
+form {
+    margin: 40px;
+}
+
+.form-row {
+    margin-top: 20px;
+}
+
+label {
+    width: 180px;
+}
+
+.error-message {
+    padding-left: 40px;
+    margin: 0px;
+    font-size: 40px;
+    color: rgba(255, 0, 0, 0.7);
+    -webkit-text-stroke-width: 1.4px;
+}

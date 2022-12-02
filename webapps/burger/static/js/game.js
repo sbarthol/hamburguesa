@@ -14,7 +14,7 @@ var youWon;
 var nextLayer;
 var freeze;
 
-function init(uuid_, roomName_, userName_) {
+function init(uuid_, roomName_, username_) {
 	this.uuid = uuid_;
 	gameCanvas.init();
 
@@ -59,7 +59,7 @@ function init(uuid_, roomName_, userName_) {
 				JSON.stringify({
 					message_type: "register",
 					uuid: uuid,
-					user_name: userName_
+					username: username_
 				})
 			);
 		});
