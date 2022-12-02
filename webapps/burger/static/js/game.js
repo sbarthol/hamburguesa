@@ -727,7 +727,7 @@ function updateCanvas() {
 	leftArm.move();
 	rightArm.move();
 
-	while (ingredients.length > 0 && ingredients[0].x > gameCanvas.canvas.width + 400) {
+	while (ingredients.length > 0 && ingredients[0].x > gameCanvas.canvas.width + 1000) {
 		ingredients.shift();
 	}
 	for (var i = 0; i < ingredients.length; i++) {
