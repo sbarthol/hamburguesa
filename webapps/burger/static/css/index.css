@@ -41,7 +41,7 @@ nav {
     width: 100vw;
 }
 
-#room-name-submit {
+#room-submit {
     font-size: 52px;
     padding-left: 20px;
     padding-right: 20px;
@@ -51,6 +51,8 @@ nav {
     margin-bottom: 30px;
     border: 2px solid black;
     border-radius: 12px;
+    background-color: #0d6efd;
+    color: white;
 }
 
 a {

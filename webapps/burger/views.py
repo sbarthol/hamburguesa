@@ -6,19 +6,23 @@ import asyncio
 from random import randrange
 import datetime
 import time
+from burger.forms import GameForm
+from django.urls import reverse
 
 from django.shortcuts import render
 from asgiref.sync import sync_to_async
+from django.http import HttpResponseRedirect
 
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
+uuid2user_name = {}
 room_name2game = {}
 
 non_top_bun_ingredients = ["mayo", "lettuce",
                            "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato", "bottom_bun"]
 all_ingredients = non_top_bun_ingredients + ["top_bun"]
-recipe_size = 1
+recipe_size = 12
 next_ingredient_seconds = 0.4
 
 
@@ -29,7 +33,6 @@ class Game:
     ingredient_id2ingredient = {}
     recipe = []
     uuids = []
-    names = {}
     is_game_over = False
     start_time = {}
     start_time_timezone = {}
@@ -72,7 +75,6 @@ class Game:
       self.start_time_timezone = datetime.datetime.now()
       self.start_time = round(time.time() * 1000)
       self.uuids = uuids
-      self.names = {uuids[0]: "player_0", uuids[1]: "player_1"} # Todo
       self.picked_ingredients = {uuids[0]: {}, uuids[1]: {}}
       self.recipe = ["bottom_bun", "steak"]
       for _ in range(recipe_size):
@@ -87,13 +89,12 @@ class Game:
 
     async def save_to_db(self, winner_uuid, loser_uuid):
       end_time = round(time.time() * 1000)
-      new_item = Score(winner_name=self.names[winner_uuid],
-                   loser_name=self.names[loser_uuid],
-                   room_name=uuid2room_name[winner_uuid],
-                   duration_millis=end_time - self.start_time,
-                   start_time=self.start_time_timezone)
+      new_item = Score(winner_name=uuid2user_name[winner_uuid],
+                       loser_name=uuid2user_name[loser_uuid],
+                       room_name=uuid2room_name[winner_uuid],
+                       duration_millis=end_time - self.start_time,
+                       start_time=self.start_time_timezone)
       await sync_to_async(new_item.save)()
-      
 
     async def game_over(self, winner_uuid):
       winner_ws = uuid2websocket[winner_uuid]
@@ -128,22 +129,34 @@ class Game:
 
 
 def index(request):
-  return render(request, "index.html")
+  return render(request, "index.html", {"form": GameForm()})
 
 
-def room(request, room_name):
-  new_uuid = str(uuid.uuid4())
-  uuid2room_name[new_uuid] = room_name
+def room(request):
+  if request.method == 'POST':
+    form = GameForm(request.POST)
+    if form.is_valid():
 
-  print(f'room_name2uuids = {room_name2uuids}')
-  print(f'uuid2room_name = {uuid2room_name}')
+      user_name = form.cleaned_data.get("name")
+      room_name = form.cleaned_data.get("room")
 
-  return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name})
+      new_uuid = str(uuid.uuid4())
+      uuid2room_name[new_uuid] = room_name
 
+      print(f'room_name2uuids = {room_name2uuids}')
+      print(f'uuid2room_name = {uuid2room_name}')
+
+      return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "user_name": user_name})
+    else:
+      return HttpResponseRedirect(reverse('index'))
+  else:
+    return HttpResponseRedirect(reverse('index'))
 
 # maintain websocket channel names
 # communicate via websockets, not requests
 # call methods from consumer.py
+
+
 async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
   await room_name2game[room_name].pick_ingredient(uuid, ingredient_id)
@@ -164,9 +177,10 @@ async def disconnect(room_name):
   room_name2uuids[room_name] = []
 
 
-async def register_websocket(uuid, ws):
+async def register_websocket(uuid, user_name, ws):
   print(f'register_websocket({uuid})')
   uuid2websocket[uuid] = ws
+  uuid2user_name[uuid] = user_name
   room_name = uuid2room_name[uuid]
   if (room_name in room_name2uuids and len(room_name2uuids[room_name]) == 2):
     for old_uuid in room_name2uuids[room_name]:
@@ -186,6 +200,7 @@ async def register_websocket(uuid, ws):
   else:
     room_name2uuids[room_name] = [uuid]
     room_name2game[room_name] = Game()
+
 
 def scoreboard(request):
   context = {'items': sorted(

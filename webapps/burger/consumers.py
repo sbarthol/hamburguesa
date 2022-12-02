@@ -33,7 +33,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             print(f'game_message({data})')
             message_type = data["message_type"]
             if (message_type == "register"):
-                await views.register_websocket(data["uuid"], self)
+                await views.register_websocket(data["uuid"], data["user_name"], self)
             elif (message_type == "pick_ingredient"):
                 await views.player_pick_ingredient(
                     data["ingredient_id"], self.room_name, data["uuid"])

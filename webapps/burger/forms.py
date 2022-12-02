@@ -1,11 +1,7 @@
 from django import forms
-from burger.models import Score
 
 
-class CreateForm(forms.ModelForm):
-    class Meta:
-        model = Score
-        exclude = (
-            'creation_time',
-            'ip_addr',
-        )
+class GameForm(forms.Form):
+    room = forms.CharField(max_length = 256)
+    name = forms.CharField(max_length = 256)
+    

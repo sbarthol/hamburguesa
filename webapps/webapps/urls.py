@@ -19,6 +19,6 @@ from burger import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("scoreboard", views.scoreboard, name="scoreboard"),
-    path("rooms/<str:room_name>/", views.room, name="room"),
+    path("room", views.room, name="room"),
     path('rules', views.rules, name="rules"),
 ]
