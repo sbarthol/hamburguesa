@@ -196,8 +196,9 @@ async def register_websocket(uuid, username, ws):
 
 
 def scoreboard(request):
-  context = {'items': sorted(
-      Score.objects.all(), key=lambda entry: entry.duration_millis, reverse=True)}
+  best_scores = Score.objects.order_by("duration_millis")[:5]
+  recent_scores = Score.objects.order_by("-start_time")[:5]
+  context = {'best_scores': best_scores, "recent_scores": recent_scores}
   return render(request, 'scoreboard.html', context)
 
 

@@ -1,7 +1,38 @@
 .score-table {
-    margin-right: 100px;
+    border-collapse: separate;
+    border: solid black 2px;
+    border-radius: 30px;
+    border-spacing: 0px;
 }
 
+tr {
+    padding: 0;
+}
+
+th:first-of-type {
+    border-top-left-radius: 27px;
+}
+
+th:last-of-type {
+    border-top-right-radius: 27px;
+}
+
+tr:first-of-type {
+    background-color: #0d6efd;
+    border-bottom-width: 2px;
+}
+
+tr:last-of-type td:first-of-type {
+    border-bottom-left-radius: 27px;
+}
+
+tr td {
+    border-top-width: 2px;
+}
+
+tr:last-of-type td:last-of-type {
+    border-bottom-right-radius: 27px;
+}
 
 @font-face {
     font-family: MouseMemoirs;
@@ -31,7 +62,9 @@ a:hover {
     color: white;
 }
 
-th, td, tr {
+th,
+td,
+tr {
     font-size: 40px;
     color: white;
     padding: 10px;
@@ -48,6 +81,16 @@ nav {
     color: white;
     -webkit-text-stroke-width: 2px !important;
     -webkit-text-stroke-color: black;
-    border-bottom: 1.40px solid black;
+    border-bottom: 2px solid black;
     position: absolute;
+}
+
+.table-container {
+    padding: 40px;
+}
+
+.table-title {
+    -webkit-text-stroke-width: 2px;
+    margin-left: 15px;
+    font-size: 60px;
 }
