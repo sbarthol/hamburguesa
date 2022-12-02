@@ -7,7 +7,6 @@ from random import randrange
 import datetime
 import time
 from burger.forms import GameForm
-from django.urls import reverse
 
 from django.shortcuts import render
 from asgiref.sync import sync_to_async
