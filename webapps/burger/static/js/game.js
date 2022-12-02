@@ -626,7 +626,7 @@ window.addEventListener("beforeunload", function () {
 });
 
 function createGameSocket(roomName, callback) {
-	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
+	const gameSocket = new WebSocket("wss://" + window.location.host + "/ws/" + roomName + "/");
 
 	gameSocket.onmessage = function (e) {
 		if (gameIsOver) {
