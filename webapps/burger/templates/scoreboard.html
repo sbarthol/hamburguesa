@@ -36,6 +36,23 @@
   </nav>
 
   <div class="table-container">
+    <p class="table-title">5 most savvy players</p>
+    <table class="score-table">
+      <tr>
+        <th>Winner</th>
+        <th># Wins</th>
+        <th>Most recent game</th>
+      </tr>
+      {% for item in savvy_players %}
+      <tr>
+        <td>{{item.winner_name}}</td>
+        <td>{{item.wins}}</td>
+        <td>{{item.most_recent}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <br>
+
     <p class="table-title">10 best scores of all time</p>
     <table class="score-table">
       <tr>

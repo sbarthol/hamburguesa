@@ -10,6 +10,7 @@ from burger.forms import GameForm
 
 from django.shortcuts import render
 from asgiref.sync import sync_to_async
+from django.db.models import Count, Max, Value, DateTimeField
 
 room_name2uuids = {}
 uuid2websocket = {}
@@ -141,13 +142,14 @@ def index(request):
 
       return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "username": username})
     else:
-      return render(request, "index.html", {"form": form})  
+      return render(request, "index.html", {"form": form})
   else:
-    return render(request, "index.html", {"form": GameForm()})  
-  
+    return render(request, "index.html", {"form": GameForm()})
+
 # maintain websocket channel names
 # communicate via websockets, not requests
 # call methods from consumer.py
+
 
 async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
@@ -197,7 +199,14 @@ async def register_websocket(uuid, username, ws):
 def scoreboard(request):
   best_scores = Score.objects.order_by("duration_millis")[:10]
   recent_scores = Score.objects.order_by("-start_time")[:10]
-  context = {'best_scores': best_scores, "recent_scores": recent_scores}
+  savvy_players = Score.objects.values("winner_name").annotate(
+      wins=Count('winner_name')).order_by('-wins')[:5]
+  for player in savvy_players:
+    most_recent = Score.objects.filter(winner_name=player["winner_name"]).aggregate(
+        most_recent=Max("start_time"))["most_recent"]
+    player["most_recent"] = most_recent
+  context = {"best_scores": best_scores,
+             "recent_scores": recent_scores, "savvy_players": savvy_players}
   return render(request, 'scoreboard.html', context)
 
 
