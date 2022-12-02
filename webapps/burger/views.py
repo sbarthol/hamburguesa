@@ -11,7 +11,6 @@ from django.urls import reverse
 
 from django.shortcuts import render
 from asgiref.sync import sync_to_async
-from django.http import HttpResponseRedirect
 
 room_name2uuids = {}
 uuid2websocket = {}
@@ -129,14 +128,9 @@ class Game:
 
 
 def index(request):
-  return render(request, "index.html", {"form": GameForm()})
-
-
-def room(request):
   if request.method == 'POST':
     form = GameForm(request.POST)
     if form.is_valid():
-
       user_name = form.cleaned_data.get("name")
       room_name = form.cleaned_data.get("room")
 
@@ -148,14 +142,13 @@ def room(request):
 
       return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "user_name": user_name})
     else:
-      return HttpResponseRedirect(reverse('index'))
+      return render(request, "index.html", {"form": GameForm()})  
   else:
-    return HttpResponseRedirect(reverse('index'))
-
+    return render(request, "index.html", {"form": GameForm()})  
+  
 # maintain websocket channel names
 # communicate via websockets, not requests
 # call methods from consumer.py
-
 
 async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')

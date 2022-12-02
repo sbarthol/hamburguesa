@@ -36,7 +36,7 @@
     </nav>
     <img src="{% static 'all_ingredients.png' %}" class="header-image" alt="World's Best Burger Builder!">
     <div id="error-message"></div>
-    <form action = "{% url 'room' %}" method = "post">
+    <form action = "{% url 'index' %}" method = "post">
       {% csrf_token %}
       {{form}}
       <input type="submit" id="room-submit" value="Join">
