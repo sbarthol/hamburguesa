@@ -47,4 +47,6 @@ Owner: Sacha Bartholme (sbarthol)
 [Slides](https://docs.google.com/presentation/d/1jy9ZDymGN-EwAJZe6SN1RIIAMoNEY23YpZ_stpJuZHM/edit?usp=sharing)
 
 ## Resources
--[Sparkles](https://pngtree.com/freepng/sparkling-symbol-vector-starter-icons-shiny-stars--flash-decoration-twinkle-glowing-and-bursts-vector_5225129.html)
+- [Sparkles](https://pngtree.com/freepng/sparkling-symbol-vector-starter-icons-shiny-stars--flash-decoration-twinkle-glowing-and-bursts-vector_5225129.html)
+- [Bootstrap](https://getbootstrap.com/)
+- [Redis](https://redis.io/)
