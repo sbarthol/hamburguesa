@@ -20,6 +20,12 @@ python3 manage.py runserver
 
 ## Project specification - November 2 2022
 
+The next sprint will focus on
+* Have a basic UI (with 2 hands drawn on the screen)
+* Having websockets set up and working
+
+Owner: Joshua Mathews (jcmathew)
+
 [Doc](https://docs.google.com/document/d/1MV4VEQqHGmwVlGkUqLYgXefBsELdKJruy_gkZG19qq8/edit?usp=sharing)
 
 ## Sprint presentation - November 3 2022
