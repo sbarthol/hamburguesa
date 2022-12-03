@@ -28,7 +28,7 @@ SECRET_KEY = CONFIG.get("Django", "secret")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost"]
 CSRF_TRUSTED_ORIGINS = ["https://hamburguesa.sbarthol.me"]
 
 
