@@ -87,3 +87,10 @@ label {
     color: rgba(255, 0, 0, 0.7);
     -webkit-text-stroke-width: 1.4px;
 }
+
+.error {
+    padding-left: 20px;
+    padding-right: 20px;
+    font-size: 60px;
+
+}
