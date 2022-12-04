@@ -26,6 +26,10 @@ function init(uuid_, roomName_, username_) {
 	youWon = undefined;
 	freeze = false;
 
+	backTrack = new Audio('/static/burger_background.wav');
+	backTrack.loop = true
+	backTrack.volume = 0.1
+
 	loadedAssets = {};
 	loadAllAssets(() => {
 		const armHeight = 120;
@@ -54,11 +58,6 @@ function init(uuid_, roomName_, username_) {
 		leftArm.draw();
 		rightArm.draw();
 		burger.draw();
-
-		backTrack = loadedAssets["/static/burger_background.wav"];
-		backTrack.loop = true;
-		backTrack.volume = 0.1;
-
 		drawText("Waiting for other player...");
 
 		gameSocket = createGameSocket(roomName_, () => {
@@ -66,7 +65,7 @@ function init(uuid_, roomName_, username_) {
 				JSON.stringify({
 					message_type: "register",
 					uuid: uuid,
-					username: username_,
+					username: username_
 				})
 			);
 		});
@@ -110,14 +109,6 @@ function loadAllAssets(callback) {
 		"sparkles_2.png",
 		"sparkles_3.png",
 		"spatula.png",
-		"access_denied.wav",
-		"burger_background.wav",
-		"correct.mp3",
-		"lose.wav",
-		"slap1.mp3",
-		"squirt1.mp3",
-		"squirt2.wav",
-		"win.wav",
 	];
 	allFiles.forEach((file) => {
 		const fullPath = "/static/" + file;
@@ -131,15 +122,6 @@ function loadAllAssets(callback) {
 				}
 			};
 			img.src = fullPath;
-		} else if (fullPath.endsWith(".wav") || fullPath.endsWith(".mp3")) {
-			const audio = new Audio(fullPath);
-			audio.onloadeddata = function () {
-				loadedAssets[fullPath] = audio;
-				console.log("downloaded " + fullPath);
-				if (Object.keys(loadedAssets).length == allFiles.length) {
-					callback();
-				}
-			};
 		} else if (fullPath == "/static/MouseMemoirs-Regular.ttf") {
 			//https://www.1001fonts.com/mouse-memoirs-font.html
 			const f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
@@ -174,7 +156,10 @@ function startGame() {
 	gameIsStarted = true;
 	clearInterval(updateCanvasInterval);
 	updateCanvasInterval = setInterval(updateCanvas, 20);
-	backTrack.play();
+	// var audio = new Audio('/static/burger_background.wav');
+	// audio.loop = true
+	// audio.volume = 0.75
+	backTrack.play()
 }
 
 var gameCanvas = {
@@ -482,10 +467,21 @@ function createLeftArm(x, y, width, height) {
 				};
 			}
 			const speedVec = this.getSpeedVec();
+			if (this.movingState == 3) {
+				console.log("speedvec");
+				console.log(speedVec);
+				console.log("startY");
+				console.log(this.startY);
+				console.log("dest");
+				console.log(this.dest);
+				console.log("y");
+				console.log(this.y);
+			}
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
+				console.log(burger.top);
 				this.dest = { x: gameCanvas.canvas.width / 2, y: Math.max(this.y + 1, burger.top) };
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
@@ -495,12 +491,12 @@ function createLeftArm(x, y, width, height) {
 				this.dest = { x: this.startX + this.width, y: this.startY };
 				this.movingState = 3;
 				burger.addLayer(this.fetchedIngredient.name);
-				if (this.fetchedIngredient.name[0] == "k") {
-					var audio = loadedAssets["/static/squirt1.mp3"];
-				} else if (this.fetchedIngredient.name[0] == "m") {
-					var audio = loadedAssets["/static/squirt2.wav"];
+				if (this.fetchedIngredient.name[0] == 'k') {
+					var audio = new Audio('/static/squirt1.mp3');
+				} else if (this.fetchedIngredient.name[0] == 'm') {
+					var audio = new Audio('/static/squirt2.wav');
 				} else {
-					var audio = loadedAssets["/static/slap1.mp3"];
+					var audio = new Audio('/static/slap1.mp3');
 				}
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
@@ -631,17 +627,17 @@ gameCanvas.canvas.addEventListener(
 
 			if (nextLayer != undefined && clickedIngredient.isSpatula) {
 				clickedIngredient.name = nextLayer;
-				var audio = loadedAssets["/static/correct.mp3"];
+				var audio = new Audio('/static/correct.mp3');
 				audio.play();
 			} else if (nextLayer != undefined && nextLayer != clickedIngredient.name) {
 				freeze = true;
 				setTimeout(() => {
 					freeze = false;
 				}, 3000);
-				var audio = loadedAssets["/static/access_denied.wav"];
+				var audio = new Audio('/static/access_denied.wav');
 				audio.play();
 			} else if (nextLayer != undefined) {
-				var audio = loadedAssets["/static/correct.mp3"];
+				var audio = new Audio('/static/correct.mp3');
 				audio.play();
 			}
 		}
@@ -711,15 +707,16 @@ function createGameSocket(roomName, callback) {
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
 			youWon = true;
-			var audio = loadedAssets["/static/win.wav"];
+			var audio = new Audio('/static/win.wav');
 			audio.play();
 			backTrack.pause();
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
 			youWon = false;
-			var audio = loadedAssets["/static/lose.wav"];
+			var audio = new Audio('/static/lose.wav');
 			audio.play();
 			backTrack.pause();
+
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}
