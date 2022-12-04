@@ -4,7 +4,7 @@ import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import async_to_sync
-from burger import views
+import burger.ws as websocket
 
 
 class GameConsumer(AsyncWebsocketConsumer):
@@ -17,7 +17,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        await views.disconnect(self.room_name)
+        await websocket.disconnect(self.room_name)
 
     # Receive message from WebSocket
     async def receive(self, text_data):
@@ -33,7 +33,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             print(f'game_message({data})')
             message_type = data["message_type"]
             if (message_type == "register"):
-                await views.register_websocket(data["uuid"], data["username"], self)
+                await websocket.register_websocket(data["uuid"], data["username"], self)
             elif (message_type == "pick_ingredient"):
-                await views.player_pick_ingredient(
+                await websocket.player_pick_ingredient(
                     data["ingredient_id"], self.room_name, data["uuid"])
