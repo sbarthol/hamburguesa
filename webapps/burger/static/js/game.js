@@ -150,6 +150,10 @@ function startGame() {
 	gameIsStarted = true;
 	clearInterval(updateCanvasInterval);
 	updateCanvasInterval = setInterval(updateCanvas, 20);
+	var audio = new Audio('/static/burger_background.wav');
+	audio.loop = true
+	audio.volume = 0.75
+	audio.play()
 }
 
 var gameCanvas = {
@@ -481,8 +485,16 @@ function createLeftArm(x, y, width, height) {
 				this.dest = { x: this.startX + this.width, y: this.startY };
 				this.movingState = 3;
 				burger.addLayer(this.fetchedIngredient.name);
+				if (this.fetchedIngredient.name[0] == 'k') {
+					var audio = new Audio('/static/squirt1.mp3');
+				} else if (this.fetchedIngredient.name[0] == 'm') {
+					var audio = new Audio('/static/squirt2.wav');
+				} else {
+					var audio = new Audio('/static/slap1.mp3');
+				}
 				this.fetchedIngredient.release();
 				this.fetchedIngredient = undefined;
+				audio.play();
 			} else if (this.movingState == 3 && this.x + this.width < this.dest.x) {
 				this.x = this.dest.x - this.width;
 				this.y = this.dest.y;
@@ -614,6 +626,11 @@ gameCanvas.canvas.addEventListener(
 				setTimeout(() => {
 					freeze = false;
 				}, 3000);
+				var audio = new Audio('/static/access_denied.wav');
+				audio.play();
+			} else if (nextLayer != undefined) {
+				var audio = new Audio('/static/correct.mp3');
+				audio.play();
 			}
 		}
 	},
@@ -682,9 +699,13 @@ function createGameSocket(roomName, callback) {
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
 			youWon = true;
+			// var audio = new Audio('/static/win.wav');
+			// audio.play();
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
 			youWon = false;
+			// var audio = new Audio('/static/lose.wav');
+			// audio.play();
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}
