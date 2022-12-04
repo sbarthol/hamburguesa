@@ -13,6 +13,7 @@ var loadedAssets;
 var youWon;
 var nextLayer;
 var freeze;
+var backTrack;
 
 function init(uuid_, roomName_, username_) {
 	this.uuid = uuid_;
@@ -24,6 +25,11 @@ function init(uuid_, roomName_, username_) {
 	nextLayer = undefined;
 	youWon = undefined;
 	freeze = false;
+
+	backTrack = new Audio('/static/burger_background.wav');
+	backTrack.loop = true
+	backTrack.volume = 0.75
+
 	loadedAssets = {};
 	loadAllAssets(() => {
 		const armHeight = 120;
@@ -150,10 +156,10 @@ function startGame() {
 	gameIsStarted = true;
 	clearInterval(updateCanvasInterval);
 	updateCanvasInterval = setInterval(updateCanvas, 20);
-	var audio = new Audio('/static/burger_background.wav');
-	audio.loop = true
-	audio.volume = 0.75
-	audio.play()
+	// var audio = new Audio('/static/burger_background.wav');
+	// audio.loop = true
+	// audio.volume = 0.75
+	backTrack.play()
 }
 
 var gameCanvas = {
@@ -699,13 +705,16 @@ function createGameSocket(roomName, callback) {
 		} else if (data["message_type"] == "game_over_win") {
 			console.log("received data " + e.data);
 			youWon = true;
-			// var audio = new Audio('/static/win.wav');
-			// audio.play();
+			var audio = new Audio('/static/win.wav');
+			audio.play();
+			backTrack.pause();
 		} else if (data["message_type"] == "game_over_lose") {
 			console.log("received data " + e.data);
 			youWon = false;
-			// var audio = new Audio('/static/lose.wav');
-			// audio.play();
+			var audio = new Audio('/static/lose.wav');
+			audio.play();
+			backTrack.pause();
+
 		} else {
 			console.error("unhandled message_type: " + data["message_type"]);
 		}

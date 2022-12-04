@@ -56,3 +56,14 @@ Owner: Sacha Bartholme (sbarthol)
 - [Sparkles](https://pngtree.com/freepng/sparkling-symbol-vector-starter-icons-shiny-stars--flash-decoration-twinkle-glowing-and-bursts-vector_5225129.html)
 - [Bootstrap](https://getbootstrap.com/)
 - [Redis](https://redis.io/)
+
+### Audio
+- [Error](https://freesound.org/people/suntemple/sounds/249300/)
+- [Slap](https://freesound.org/people/MWLANDI/sounds/85846/)
+- [Splat1](https://freesound.org/people/gprosser/sounds/360942/)
+- [Splat2](https://freesound.org/people/Breviceps/sounds/445117/)
+- [Correct](https://freesound.org/people/LittleRainySeasons/sounds/335908/)
+- [Win](https://freesound.org/people/Fupicat/sounds/521639/)
+- [Lose](https://freesound.org/people/Fupicat/sounds/538151/)
+- [Background](https://freesound.org/people/joshuaempyre/sounds/251461/)
+
