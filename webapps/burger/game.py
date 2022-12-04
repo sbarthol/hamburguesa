@@ -1,4 +1,3 @@
-from django.shortcuts import render
 import uuid
 import json
 from burger.models import Score
@@ -6,13 +5,8 @@ import asyncio
 from random import randrange
 import datetime
 import time
-from burger.forms import GameForm
-
 import burger.ws as websocket
-
-from django.shortcuts import render
 from asgiref.sync import sync_to_async
-from django.db.models import Count, Max, Value, DateTimeField
 
 non_top_bun_ingredients = ["mayo", "lettuce",
                            "ketchup", "steak", "onion", "cheese", "mustard", "pickle", "bacon", "tomato", "bottom_bun"]

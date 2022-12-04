@@ -1,17 +1,12 @@
 from django.shortcuts import render
 import uuid
-import json
 from burger.models import Score
-import asyncio
-from random import randrange
-import datetime
-import time
 from burger.forms import GameForm
 
 import burger.ws as websocket
 from django.shortcuts import render
-from asgiref.sync import sync_to_async
-from django.db.models import Count, Max, Value, DateTimeField
+from django.db.models import Count, Max
+
 
 def index(request):
   if request.method == 'POST':
@@ -31,6 +26,7 @@ def index(request):
       return render(request, "index.html", {"form": form})
   else:
     return render(request, "index.html", {"form": GameForm()})
+
 
 def scoreboard(request):
   best_scores = Score.objects.order_by("duration_millis")[:10]

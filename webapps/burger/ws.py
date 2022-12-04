@@ -1,18 +1,9 @@
 from django.shortcuts import render
 import uuid
 import json
-from burger.models import Score
-import asyncio
-from random import randrange
-import datetime
-import time
 from burger.forms import GameForm
-
 from burger.game import Game
-
 from django.shortcuts import render
-from asgiref.sync import sync_to_async
-from django.db.models import Count, Max, Value, DateTimeField
 
 room_name2uuids = {}
 uuid2websocket = {}
@@ -84,4 +75,3 @@ async def register_websocket(uuid, username, ws):
   else:
     room_name2uuids[room_name] = [uuid]
     room_name2game[room_name] = Game()
-
