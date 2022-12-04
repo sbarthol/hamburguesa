@@ -467,21 +467,10 @@ function createLeftArm(x, y, width, height) {
 				};
 			}
 			const speedVec = this.getSpeedVec();
-			if (this.movingState == 3) {
-				console.log("speedvec");
-				console.log(speedVec);
-				console.log("startY");
-				console.log(this.startY);
-				console.log("dest");
-				console.log(this.dest);
-				console.log("y");
-				console.log(this.y);
-			}
 			this.x += speedVec.x;
 			this.y += speedVec.y;
 
 			if (this.movingState == 1 && this.y < this.dest.y) {
-				console.log(burger.top);
 				this.dest = { x: gameCanvas.canvas.width / 2, y: Math.max(this.y + 1, burger.top) };
 				this.movingState = 2;
 				this.fetchedIngredient.grab(this);
