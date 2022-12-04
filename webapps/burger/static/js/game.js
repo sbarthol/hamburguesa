@@ -28,7 +28,7 @@ function init(uuid_, roomName_, username_) {
 
 	backTrack = new Audio('/static/burger_background.wav');
 	backTrack.loop = true
-	backTrack.volume = 0.75
+	backTrack.volume = 0.1
 
 	loadedAssets = {};
 	loadAllAssets(() => {
@@ -627,6 +627,8 @@ gameCanvas.canvas.addEventListener(
 
 			if (nextLayer != undefined && clickedIngredient.isSpatula) {
 				clickedIngredient.name = nextLayer;
+				var audio = new Audio('/static/correct.mp3');
+				audio.play();
 			} else if (nextLayer != undefined && nextLayer != clickedIngredient.name) {
 				freeze = true;
 				setTimeout(() => {
@@ -743,6 +745,7 @@ function createGameSocket(roomName, callback) {
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 
 		drawText("Oops, something went wrong...");
+		backTrack.pause();
 	};
 	gameSocket.onopen = function (_) {
 		callback();
