@@ -1,4 +1,4 @@
-# Burger (F22 Team 34)
+# Hamburguesa
 
 ## Build
 1. Install [Channels/Daphne](https://channels.readthedocs.io/en/latest/installation.html) and channels_redis:
