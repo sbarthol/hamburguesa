@@ -18,6 +18,14 @@ function init(uuid_, roomName_, username_) {
 	this.uuid = uuid_;
 	gameCanvas.init();
 
+	const f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
+	f.load().then(function (font) {
+		// Add font on the html page
+		document.fonts.add(font);
+		console.log("downloaded /static/MouseMemoirs-Regular.ttf");	
+		drawText("Loading resources...");
+	});
+
 	ingredients = [];
 	gameIsStarted = false;
 	gameIsOver = false;
@@ -49,6 +57,9 @@ function init(uuid_, roomName_, username_) {
 			256
 		);
 
+		ctx = gameCanvas.context;
+		ctx.clearRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
+
 		belt.draw();
 		leftArm.draw();
 		rightArm.draw();
@@ -76,7 +87,6 @@ function loadAllAssets(callback) {
 		"leftArm.png",
 		"lettuce.png",
 		"mayo.png",
-		"MouseMemoirs-Regular.ttf",
 		"onion.png",
 		"rightArm.png",
 		"scrambled.png",
@@ -117,17 +127,6 @@ function loadAllAssets(callback) {
 				}
 			};
 			img.src = fullPath;
-		} else if (fullPath == "/static/MouseMemoirs-Regular.ttf") {
-			const f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
-			f.load().then(function (font) {
-				// Add font on the html page
-				document.fonts.add(font);
-				loadedAssets[fullPath] = font;
-				console.log("downloaded " + fullPath);
-				if (Object.keys(loadedAssets).length == allFiles.length) {
-					callback();
-				}
-			});
 		} else {
 			console.error("could not download " + fullPath);
 		}
