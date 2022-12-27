@@ -751,7 +751,7 @@ function updateCanvas() {
 	}
 	burger.draw();
 
-	if (freeze) {
+	if (freeze && !gameIsOver) {
 		ctx.fillStyle = "rgba(255, 128, 0, 0.5)";
 		ctx.fillRect(0, 0, gameCanvas.canvas.width, gameCanvas.canvas.height);
 		drawText("Wrong ingredient!");
