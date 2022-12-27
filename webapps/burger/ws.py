@@ -22,9 +22,6 @@ def index(request):
       new_uuid = str(uuid.uuid4())
       uuid2room_name[new_uuid] = room_name
 
-      print(f'room_name2uuids = {room_name2uuids}')
-      print(f'uuid2room_name = {uuid2room_name}')
-
       return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "username": username})
     else:
       return render(request, "index.html", {"form": form})
@@ -49,7 +46,11 @@ async def disconnect(room_name):
   for uuid in room_name2uuids[room_name]:
     ws = uuid2websocket[uuid]
     await ws.close()
-  room_name2uuids[room_name] = []
+    del uuid2room_name[uuid]
+    del uuid2username[uuid]
+    del uuid2websocket[uuid]
+  del room_name2game[room_name]
+  del room_name2uuids[room_name]
 
 
 async def register_websocket(uuid, username, ws):
@@ -75,3 +76,6 @@ async def register_websocket(uuid, username, ws):
   else:
     room_name2uuids[room_name] = [uuid]
     room_name2game[room_name] = Game()
+
+  print(f'room_name2uuids = {room_name2uuids}')
+  print(f'uuid2room_name = {uuid2room_name}')
