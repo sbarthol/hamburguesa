@@ -118,7 +118,6 @@ function loadAllAssets(callback) {
 			};
 			img.src = fullPath;
 		} else if (fullPath == "/static/MouseMemoirs-Regular.ttf") {
-			//https://www.1001fonts.com/mouse-memoirs-font.html
 			const f = new FontFace("MouseMemoirs", "url(/static/MouseMemoirs-Regular.ttf)");
 			f.load().then(function (font) {
 				// Add font on the html page

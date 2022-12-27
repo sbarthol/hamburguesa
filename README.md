@@ -56,6 +56,7 @@ Owner: Sacha Bartholme (sbarthol)
 - [Sparkles](https://pngtree.com/freepng/sparkling-symbol-vector-starter-icons-shiny-stars--flash-decoration-twinkle-glowing-and-bursts-vector_5225129.html)
 - [Bootstrap](https://getbootstrap.com/)
 - [Redis](https://redis.io/)
+- [Font](https://www.1001fonts.com/mouse-memoirs-font.html)
 
 ### Audio
 - [Error](https://freesound.org/people/suntemple/sounds/249300/)
