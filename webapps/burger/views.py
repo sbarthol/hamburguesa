@@ -18,9 +18,6 @@ def index(request):
       new_uuid = str(uuid.uuid4())
       websocket.uuid2room_name[new_uuid] = room_name
 
-      print(f'room_name2uuids = {websocket.room_name2uuids}')
-      print(f'uuid2room_name = {websocket.uuid2room_name}')
-
       return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "username": username})
     else:
       return render(request, "index.html", {"form": form})

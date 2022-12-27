@@ -1,33 +1,11 @@
-from django.shortcuts import render
-import uuid
 import json
-from burger.forms import GameForm
 from burger.game import Game
-from django.shortcuts import render
 
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
 uuid2username = {}
 room_name2game = {}
-
-
-def index(request):
-  if request.method == 'POST':
-    form = GameForm(request.POST)
-    if form.is_valid():
-      username = form.cleaned_data.get("username")
-      room_name = form.cleaned_data.get("room")
-
-      new_uuid = str(uuid.uuid4())
-      uuid2room_name[new_uuid] = room_name
-
-      return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "username": username})
-    else:
-      return render(request, "index.html", {"form": form})
-  else:
-    return render(request, "index.html", {"form": GameForm()})
-
 
 async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
