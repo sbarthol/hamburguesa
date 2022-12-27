@@ -29,10 +29,10 @@ def index(request):
 
 
 def scoreboard(request):
-  best_scores = Score.objects.order_by("duration_millis")[:10]
-  recent_scores = Score.objects.order_by("-start_time")[:10]
+  best_scores = Score.objects.order_by("duration_millis")[:5]
+  recent_scores = Score.objects.order_by("-start_time")[:5]
   savvy_players = Score.objects.values("winner_name").annotate(
-      wins=Count('winner_name')).order_by('-wins')[:5]
+      wins=Count('winner_name')).order_by('-wins')[:3]
   for player in savvy_players:
     most_recent = Score.objects.filter(winner_name=player["winner_name"]).aggregate(
         most_recent=Max("start_time"))["most_recent"]
