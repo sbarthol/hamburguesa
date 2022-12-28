@@ -9,8 +9,9 @@ import burger.ws as websocket
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = "game_%s" % self.room_name
+        encoded_room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        self.room_name = websocket.base64_decode(encoded_room_name.encode("ascii")).decode("utf-8")
+        self.room_group_name = "game_%s" % encoded_room_name
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 

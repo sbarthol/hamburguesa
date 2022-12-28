@@ -1,7 +1,5 @@
 from django import forms
-
-def string_is_short(s):
-    return len(s) <= 64
+import burger.ws as websocket
 
 class GameForm(forms.Form):
     room = forms.CharField(max_length=256)
@@ -9,13 +7,14 @@ class GameForm(forms.Form):
 
     def clean_room(self):
         room = self.cleaned_data.get('room')
-        if not string_is_short(room):
+        encoded_room_name = websocket.base64_encode(room.encode("utf-8")).decode("ascii")
+        if len(encoded_room_name) > 100:
             raise forms.ValidationError("Room name is too long.")
 
         return room
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if not string_is_short(username):
+        if len(username) > 64:
             raise forms.ValidationError("Username is too long.")
         return username

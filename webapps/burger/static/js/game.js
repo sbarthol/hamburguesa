@@ -14,7 +14,7 @@ var youWon;
 var nextLayer;
 var freeze;
 
-function init(uuid_, roomName_, username_) {
+function init(uuid_, encodedRoomName_, username_) {
 	this.uuid = uuid_;
 	gameCanvas.init();
 
@@ -66,7 +66,7 @@ function init(uuid_, roomName_, username_) {
 		burger.draw();
 		drawText("Waiting for other player...");
 
-		gameSocket = createGameSocket(roomName_, () => {
+		gameSocket = createGameSocket(encodedRoomName_, () => {
 			gameSocket.send(
 				JSON.stringify({
 					message_type: "register",
@@ -628,8 +628,8 @@ window.addEventListener("beforeunload", function () {
 	gameSocket.close();
 });
 
-function createGameSocket(roomName, callback) {
-	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + roomName + "/");
+function createGameSocket(encodedRoomName, callback) {
+	const gameSocket = new WebSocket("ws://" + window.location.host + "/ws/" + encodedRoomName + "/");
 
 	gameSocket.onmessage = function (e) {
 		if (gameIsOver) {

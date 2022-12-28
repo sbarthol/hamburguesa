@@ -11,7 +11,7 @@
   crossorigin="anonymous"></script>
 </head>
 
-<body onload="init('{{uuid}}', '{{room_name}}', '{{username}}')">
+<body onload="init('{{uuid}}', '{{encoded_room_name}}', '{{username|urlencode}}')">
 </body>
 
 <script src="{% static 'js/game.js' %}" type="text/javascript"></script>

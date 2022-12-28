@@ -17,8 +17,9 @@ def index(request):
 
       new_uuid = str(uuid.uuid4())
       websocket.uuid2room_name[new_uuid] = room_name
+      encoded_room_name = websocket.base64_encode(room_name.encode("utf-8")).decode("ascii")
 
-      return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "username": username})
+      return render(request, 'game.html', {"uuid": new_uuid, "room_name": room_name, "encoded_room_name": encoded_room_name, "username": username})
     else:
       return render(request, "index.html", {"form": form})
   else:

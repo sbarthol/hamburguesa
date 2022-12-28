@@ -1,11 +1,29 @@
 import json
 from burger.game import Game
+import base64
+from urllib.parse import unquote
 
 room_name2uuids = {}
 uuid2websocket = {}
 uuid2room_name = {}
 uuid2username = {}
 room_name2game = {}
+
+def base64_encode(bytes):
+    """
+    Removes any `=` used as padding from the encoded string.
+    """
+    encoded = base64.urlsafe_b64encode(bytes)
+    return encoded.rstrip(b"=")
+
+
+def base64_decode(bytes):
+    """
+    Adds back in the required padding before decoding.
+    """
+    padding = 4 - (len(bytes) % 4)
+    bytes = bytes + (b"=" * padding)
+    return base64.urlsafe_b64decode(bytes)
 
 async def player_pick_ingredient(ingredient_id, room_name, uuid):
   print(f'player_pick_ingredient({ingredient_id, room_name, uuid})')
@@ -34,7 +52,7 @@ async def disconnect(room_name):
 async def register_websocket(uuid, username, ws):
   print(f'register_websocket({uuid})')
   uuid2websocket[uuid] = ws
-  uuid2username[uuid] = username
+  uuid2username[uuid] = unquote(username)
   room_name = uuid2room_name[uuid]
   if (room_name in room_name2uuids and len(room_name2uuids[room_name]) == 2):
     for old_uuid in room_name2uuids[room_name]:
