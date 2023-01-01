@@ -39,14 +39,15 @@ def get_other_uuid(room_name, uuid):
 
 
 async def disconnect(room_name):
-  for uuid in room_name2uuids[room_name]:
-    ws = uuid2websocket[uuid]
-    await ws.close()
-    del uuid2room_name[uuid]
-    del uuid2username[uuid]
-    del uuid2websocket[uuid]
-  del room_name2game[room_name]
-  del room_name2uuids[room_name]
+  if room_name in room_name2uuids:
+    for uuid in room_name2uuids[room_name]:
+      ws = uuid2websocket[uuid]
+      await ws.close()
+      del uuid2room_name[uuid]
+      del uuid2username[uuid]
+      del uuid2websocket[uuid]
+    del room_name2game[room_name]
+    del room_name2uuids[room_name]
 
 
 async def register_websocket(uuid, username, ws):
