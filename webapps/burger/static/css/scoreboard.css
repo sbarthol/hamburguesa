@@ -72,6 +72,9 @@ tr {
     -webkit-text-stroke-width: 1.40px;
     -webkit-text-stroke-color: black;
     text-decoration: none;
+    max-width: 18vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 
