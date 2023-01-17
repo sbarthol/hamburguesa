@@ -45,7 +45,7 @@
       </tr>
       {% for item in savvy_players %}
       <tr>
-        <td>{{item.winner_name}}</td>
+        <td style="max-width: 17vw;">{{item.winner_name}}</td>
         <td>{{item.wins}}</td>
         <td>{{item.most_recent}}</td>
       </tr>
@@ -64,10 +64,10 @@
       </tr>
       {% for item in best_scores %}
       <tr>
-        <td>{{item.winner_name}}</td>
-        <td>{{item.loser_name}}</td>
+        <td style="max-width: 17vw;">{{item.winner_name}}</td>
+        <td style="max-width: 17vw;">{{item.loser_name}}</td>
         <td>{{item.duration_millis}} ms</td>
-        <td>{{item.room_name}}</td>
+        <td style="max-width: 17vw;">{{item.room_name}}</td>
         <td>{{item.start_time}}</td>
       </tr>
       {% endfor %}
@@ -85,10 +85,10 @@
       </tr>
       {% for item in recent_scores %}
       <tr>
-        <td>{{item.winner_name}}</td>
-        <td>{{item.loser_name}}</td>
+        <td style="max-width: 17vw;">{{item.winner_name}}</td>
+        <td style="max-width: 17vw;">{{item.loser_name}}</td>
         <td>{{item.duration_millis}} ms</td>
-        <td>{{item.room_name}}</td>
+        <td style="max-width: 17vw;">{{item.room_name}}</td>
         <td>{{item.start_time}}</td>
       </tr>
       {% endfor %}
